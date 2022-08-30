@@ -1,7 +1,9 @@
 import os
 from typing import Any
+
 from nonebot.drivers import Driver
 from nonebot.typing import overrides
+
 from nonebot.adapters import Adapter as BaseAdapter
 
 from .bot import Bot
@@ -15,9 +17,11 @@ class Adapter(BaseAdapter):
     def __init__(self, driver: Driver, **kwargs: Any) -> None:
         super().__init__(driver, **kwargs)
         self.bot = Bot(self, BotConfig(user_id="0"))
+
         @console_view.on.append
         async def _handle_event(event: Event) -> None:
             await self.bot.handle_event(event)
+
         self.setup()
 
     @staticmethod

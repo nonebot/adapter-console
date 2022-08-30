@@ -11,4 +11,4 @@ __all__ = [
     "ConsoleView",
     "console_view",
     "print",
-    ]
+]
