@@ -85,7 +85,7 @@ class ConsoleView(App):
                 assert widget or text
                 await self.client.send_message(event.user_info, widget or text or "")
         finally:
-            logger.info("%s: %s" % (event.user_info.nickname, message))
+            logger.info(f"{event.user_info.nickname}: {message}")
 
     async def on_mount(self) -> None:
         self.width, self.height = os.get_terminal_size()
