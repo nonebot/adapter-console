@@ -28,7 +28,7 @@ class ConsoleView(App):
         self.user_info: UserInfo = user_info or UserInfo(nickname="user", user_id="1")
 
     def trigger(self) -> None:
-        ensure_future(wait(create_task(on()) for on in self.on))
+        create_task(wait(create_task(on()) for on in self.on))
 
     async def on_load(self) -> None:
         await self.bind("enter", "send_msg")
