@@ -1,5 +1,6 @@
 import os
 from textual import events
+from rich.markdown import Markdown
 from textual.app import App
 from nonebot.log import logger
 from collections import defaultdict
@@ -30,7 +31,7 @@ class ConsoleView(App):
         )
 
     def trigger(self) -> None:
-        ensure_future(wait([create_task(on()) for on in self.on])) 
+        ensure_future(wait(create_task(on()) for on in self.on)) 
 
     async def on_load(self) -> None:
         await self.bind("enter", "send_msg")
@@ -71,13 +72,23 @@ class ConsoleView(App):
             event (MessageEvent): 消息事件
             message (Union[str, Message, MessageSegment]): 回复内容
         """
-        if isinstance(message, Message):
-            message = message.extract_plain_text()
-        elif isinstance(message, MessageSegment):
-            message = Message(message).extract_plain_text()
-        assert isinstance(message, str)
-        await self.client.send_message(event.user_info, message)
-        logger.info("%s: %s" % (event.user_info.nickname, message))
+        try:
+            if isinstance(message, MessageSegment):
+                message = Message(message)
+            elif isinstance(message, str):
+                await self.client.send_message(event.user_info, message)
+            
+            if isinstance(message, Message) and message:
+                widget = None
+                text = None
+                if md := message.get("markdown"):
+                    widget = Markdown(**md[0].data["markdown"])
+                else:
+                    text = message.extract_plain_text()
+                assert widget or text
+                await self.client.send_message(event.user_info, widget or text or "")
+        finally:
+            logger.info("%s: %s" % (event.user_info.nickname, message))
 
     async def on_mount(self) -> None:
         self.width, self.height = os.get_terminal_size()

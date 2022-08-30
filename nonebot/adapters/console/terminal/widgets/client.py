@@ -29,10 +29,9 @@ class ChatScreen(Widget):
     async def send_message(
         self, 
         sender: BaseInfo, 
-        message: str
+        message: Union[str, Widget, Markdown]
         ) -> None:
         await sleep(0)
-        # print(sender)
         if self.sender != sender:
             self.sender = sender
             logger.info(str(sender))

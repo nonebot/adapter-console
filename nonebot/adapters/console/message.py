@@ -6,7 +6,6 @@ from nonebot.adapters import Message as BaseMessage
 from nonebot.adapters import MessageSegment as BaseMessageSegment
 
 
-
 class MessageSegment(BaseMessageSegment["Message"]):
     @classmethod
     @overrides(BaseMessageSegment)
@@ -32,24 +31,24 @@ class MessageSegment(BaseMessageSegment["Message"]):
     def text(text: str) -> "MessageSegment":
         return MessageSegment("text", {"text": text})
     
-    # @staticmethod
-    # def markdown(        
-    #     markup: str,
-    #     code_theme: str = "monokai",
-    #     justify: Optional[JustifyMethod] = None,
-    #     style: Union[str, Style] = "none",
-    #     hyperlinks: bool = True,
-    #     inline_code_lexer: Optional[str] = None,
-    #     inline_code_theme: Optional[str] = None) -> "MessageSegment":
-    #     return MessageSegment("markdown", {"markdown": {
-    #             "markup": markup,
-    #             "code_theme": code_theme,
-    #             "justify": justify,
-    #             "style": style,
-    #             "hyperlinks": hyperlinks,
-    #             "inline_code_lexer": inline_code_lexer,
-    #             "inline_code_theme": inline_code_theme,
-    #         }})
+    @staticmethod
+    def markdown(        
+        markup: str,
+        code_theme: str = "monokai",
+        justify: Optional[JustifyMethod] = None,
+        style: Union[str, Style] = "none",
+        hyperlinks: bool = True,
+        inline_code_lexer: Optional[str] = None,
+        inline_code_theme: Optional[str] = None) -> "MessageSegment":
+        return MessageSegment("markdown", {"markdown": {
+                "markup": markup,
+                "code_theme": code_theme,
+                "justify": justify,
+                "style": style,
+                "hyperlinks": hyperlinks,
+                "inline_code_lexer": inline_code_lexer,
+                "inline_code_theme": inline_code_theme,
+            }})
 
 
 class Message(BaseMessage[MessageSegment]):
