@@ -1,9 +1,11 @@
 from pydantic import BaseModel
 from nonebot.typing import overrides
+
 from nonebot.adapters import Event as BaseEvent
 
-from .message import Message
 from .config import BaseInfo
+from .message import Message
+
 
 class Event(BaseEvent):
     __type__ = "Event"
@@ -31,7 +33,7 @@ class Event(BaseEvent):
     @overrides(BaseEvent)
     def get_session_id(self) -> str:
         raise ValueError("Event has no session_id!")
-    
+
     @overrides(BaseEvent)
     def is_tome(self) -> bool:
         """获取事件是否与机器人有关的方法。"""

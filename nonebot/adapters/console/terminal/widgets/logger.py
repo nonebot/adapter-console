@@ -1,9 +1,11 @@
 from typing import Union
+from logging import StreamHandler
+
 from rich.tree import Tree
 from textual.widget import Widget
-from logging import StreamHandler
 from textual.widgets import ScrollView
 from nonebot.log import logger, default_filter, default_format
+
 
 class ConsoleHandler(StreamHandler):
     def __init__(self, messages: "Logger") -> None:
@@ -26,10 +28,12 @@ class Logger(Widget):
             self.handler,
             filter=default_filter,
             format=default_format,
-            )
+        )
 
     def scroll_end(self, refresh: bool = True) -> None:
-        self.scroll.target_y = self.scroll.window.virtual_size.height - self.scroll.size.height
+        self.scroll.target_y = (
+            self.scroll.window.virtual_size.height - self.scroll.size.height
+        )
         self.scroll.animate("y", self.scroll.target_y, duration=0)
         if refresh:
             self.scroll.window.refresh(layout=True)

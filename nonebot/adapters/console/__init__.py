@@ -1,6 +1,5 @@
 from .adapter import Adapter
-from .terminal import print
-from .terminal import console_view
+from .terminal import print, console_view
 
 
 async def shutdown():

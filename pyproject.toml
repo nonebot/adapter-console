@@ -1,13 +1,18 @@
 [tool.poetry]
 name = "nonebot-adapter-console"
-version = "0.1.0"
-description = ""
-authors = ["yanyongyu <yyy@nonebot.dev>"]
+version = "0.2.0"
+description = "console adapter for nonebot2"
+authors = ["MelodyKnit <yanximelody@gmail.com>"]
 license = "MIT"
 
+packages = [
+  { include = "nonebot" }
+] 
+
 [tool.poetry.dependencies]
-python = "^3.7.3"
+python = "^3.8.0"
 nonebot2 = "^2.0.0-beta.1"
+textual = "0.1.18"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.10.1"
