@@ -61,7 +61,7 @@ class MessageEvent(Event):
 
     @overrides(Event)
     def is_tome(self) -> bool:
-        return False
+        return True
 
     @overrides(Event)
     def get_event_description(self) -> str:
