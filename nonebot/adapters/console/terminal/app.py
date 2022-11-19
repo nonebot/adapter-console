@@ -111,7 +111,7 @@ class ConsoleView(App):
             name=self.client.name,
             size=self.height - self.input.height - 1,
         )
-        await self.view.dock(self.input)
+        await self.view.dock(self.input, edge="bottom", size=self.input.height)
 
     async def on_key(self, event: events.Key) -> None:
         self.input.insert(event.key)
