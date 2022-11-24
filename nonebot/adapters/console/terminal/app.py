@@ -5,9 +5,11 @@ from typing import Dict, List, Union, Callable, Optional
 
 from textual import events
 from textual.app import App
+from textual.view import View
 from nonebot.log import logger
 from rich.markdown import Markdown
 from textual.widgets import ScrollView
+from textual.layouts.grid import GridLayout
 
 from ..config import UserInfo
 from .widgets.input import Input
@@ -97,11 +99,10 @@ class ConsoleView(App):
         self.scroll[self.client.name] = self.client.scroll
         self.scroll[self.logger.name] = self.logger.scroll
 
-        grid = await self.view.dock_grid(edge="left")
+        grid = GridLayout()
         grid.add_column(fraction=3, name="left")
         grid.add_column(size=2, name="center")
         grid.add_column(fraction=2, name="right")
-        grid.add_row(size=3, name="top")
         grid.add_row(fraction=1, name="center")
         grid.add_row(size=self.input.height, name="bottom")
 
@@ -114,12 +115,15 @@ class ConsoleView(App):
         )
 
         grid.place(
-            head_bar=self.head_bar,
             client=self.scroll[self.client.name],
             separator=Right(),
             logger=self.scroll[self.logger.name],
             input=self.input,
         )
+
+        view = View(layout=grid)
+        await self.view.dock(self.head_bar)
+        await self.view.dock(view)
 
     async def on_key(self, event: events.Key) -> None:
         self.input.insert(event.key)
