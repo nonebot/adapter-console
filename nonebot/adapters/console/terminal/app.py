@@ -88,7 +88,6 @@ class ConsoleView(App):
             logger.info(f"{event.user_info.nickname}: {message}")
 
     async def on_mount(self) -> None:
-        self.width, self.height = os.get_terminal_size()
         self.head_bar: HeadBar = HeadBar()
         self.input: Input = Input()
         self.logger: Logger = Logger()
@@ -98,20 +97,29 @@ class ConsoleView(App):
         self.scroll[self.client.name] = self.client.scroll
         self.scroll[self.logger.name] = self.logger.scroll
 
-        await self.view.dock(self.head_bar)
-        await self.view.dock(
-            self.scroll[self.logger.name],
-            edge="right",
-            name=self.logger.name,
-            size=int(self.width * 0.39),
+        grid = await self.view.dock_grid(edge="left")
+        grid.add_column(fraction=3, name="left")
+        grid.add_column(size=2, name="center")
+        grid.add_column(fraction=2, name="right")
+        grid.add_row(size=3, name="top")
+        grid.add_row(fraction=1, name="center")
+        grid.add_row(size=self.input.height, name="bottom")
+
+        grid.add_areas(
+            head_bar="left-start|right-end,top",
+            client="left,center",
+            separator="center,center-start|bottom-end",
+            logger="right,center-start|bottom-end",
+            input="left,bottom",
         )
-        await self.view.dock(Right(), edge="right", size=2)
-        await self.view.dock(
-            self.scroll[self.client.name],
-            name=self.client.name,
-            size=self.height - self.input.height - 1,
+
+        grid.place(
+            head_bar=self.head_bar,
+            client=self.scroll[self.client.name],
+            separator=Right(),
+            logger=self.scroll[self.logger.name],
+            input=self.input,
         )
-        await self.view.dock(self.input, edge="bottom", size=self.input.height)
 
     async def on_key(self, event: events.Key) -> None:
         self.input.insert(event.key)
