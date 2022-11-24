@@ -103,14 +103,13 @@ class ConsoleView(App):
         grid.add_column(fraction=3, name="left")
         grid.add_column(size=2, name="center")
         grid.add_column(fraction=2, name="right")
-        grid.add_row(fraction=1, name="center")
+        grid.add_row(fraction=1, name="top")
         grid.add_row(size=self.input.height, name="bottom")
 
         grid.add_areas(
-            head_bar="left-start|right-end,top",
-            client="left,center",
-            separator="center,center-start|bottom-end",
-            logger="right,center-start|bottom-end",
+            client="left,top",
+            separator="center,top-start|bottom-end",
+            logger="right,top-start|bottom-end",
             input="left,bottom",
         )
 
@@ -121,9 +120,9 @@ class ConsoleView(App):
             input=self.input,
         )
 
-        view = View(layout=grid)
+        grid_view = View(layout=grid)
         await self.view.dock(self.head_bar)
-        await self.view.dock(view)
+        await self.view.dock(grid_view)
 
     async def on_key(self, event: events.Key) -> None:
         self.input.insert(event.key)
