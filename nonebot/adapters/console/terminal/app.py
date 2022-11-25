@@ -5,9 +5,11 @@ from typing import Dict, List, Union, Callable, Optional
 
 from textual import events
 from textual.app import App
+from textual.view import View
 from nonebot.log import logger
 from rich.markdown import Markdown
 from textual.widgets import ScrollView
+from textual.layouts.grid import GridLayout
 
 from ..config import UserInfo
 from .widgets.input import Input
@@ -88,7 +90,6 @@ class ConsoleView(App):
             logger.info(f"{event.user_info.nickname}: {message}")
 
     async def on_mount(self) -> None:
-        self.width, self.height = os.get_terminal_size()
         self.head_bar: HeadBar = HeadBar()
         self.input: Input = Input()
         self.logger: Logger = Logger()
@@ -98,20 +99,30 @@ class ConsoleView(App):
         self.scroll[self.client.name] = self.client.scroll
         self.scroll[self.logger.name] = self.logger.scroll
 
+        grid = GridLayout()
+        grid.add_column(fraction=3, name="left")
+        grid.add_column(size=2, name="center")
+        grid.add_column(fraction=2, name="right")
+        grid.add_row(fraction=1, name="top")
+        grid.add_row(size=self.input.height, name="bottom")
+
+        grid.add_areas(
+            client="left,top",
+            separator="center,top-start|bottom-end",
+            logger="right,top-start|bottom-end",
+            input="left,bottom",
+        )
+
+        grid.place(
+            client=self.scroll[self.client.name],
+            separator=Right(),
+            logger=self.scroll[self.logger.name],
+            input=self.input,
+        )
+
+        grid_view = View(layout=grid)
         await self.view.dock(self.head_bar)
-        await self.view.dock(
-            self.scroll[self.logger.name],
-            edge="right",
-            name=self.logger.name,
-            size=int(self.width * 0.39),
-        )
-        await self.view.dock(Right(), edge="right", size=2)
-        await self.view.dock(
-            self.scroll[self.client.name],
-            name=self.client.name,
-            size=self.height - self.input.height - 1,
-        )
-        await self.view.dock(self.input)
+        await self.view.dock(grid_view)
 
     async def on_key(self, event: events.Key) -> None:
         self.input.insert(event.key)
