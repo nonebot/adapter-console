@@ -14,7 +14,7 @@ python = "^3.8.0"
 nonebot2 = "^2.0.0-beta.1"
 textual = "0.1.18"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 isort = "^5.10.1"
 black = "^22.1.0"
 pre-commit = "^2.16.0"
@@ -22,7 +22,7 @@ nonebot2 = { git = "https://github.com/nonebot/nonebot2.git" }
 
 [tool.black]
 line-length = 88
-target-version = ["py37", "py38", "py39", "py310"]
+target-version = ["py38", "py39", "py310", "py311"]
 include = '\.pyi?$'
 extend-exclude = '''
 '''
