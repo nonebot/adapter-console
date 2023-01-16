@@ -1,4 +1,4 @@
-from typing import Union
+from typing import List, Union
 from logging import StreamHandler
 
 from rich.tree import Tree
@@ -11,9 +11,16 @@ class ConsoleHandler(StreamHandler):
     def __init__(self, messages: "Logger") -> None:
         super().__init__(None)
         self.messages: "Logger" = messages
+        self.temp_logger: List[str] = []
 
     def emit(self, record) -> None:
-        self.messages.append(self.format(record))
+        try:
+            self.temp_logger.append(self.format(record))
+            for msg in self.temp_logger.copy():
+                self.messages.append(msg)
+            self.temp_logger.clear()
+        except LookupError:
+            ...
 
 
 class Logger(Widget):

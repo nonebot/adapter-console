@@ -1,5 +1,5 @@
-import os
 from typing import Any
+from asyncio import create_task
 
 from nonebot.drivers import Driver
 from nonebot.typing import overrides
@@ -37,10 +37,8 @@ class Adapter(BaseAdapter):
     def setup(self):
         @self.driver.on_startup
         async def _start() -> None:
+            create_task(console_view.run())
             self.bot_connect(self.bot)
-            await console_view.run()
-            # os.system("exit")
-            # os.system("exit")
 
         @self.driver.on_shutdown
         async def _stop() -> None:
