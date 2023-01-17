@@ -1,6 +1,5 @@
-import os
 from collections import defaultdict
-from asyncio import wait, create_task, ensure_future
+from asyncio import wait, create_task
 from typing import Dict, List, Union, Callable, Optional
 
 from textual import events
@@ -137,4 +136,6 @@ class ConsoleView(App):
             self.head_bar.status = f"{self.scroll_types[self.scroll_index]} scroll"
 
     async def run(self) -> None:
+        if self._driver:
+            self._driver.disable_input()
         await self.process_messages()
