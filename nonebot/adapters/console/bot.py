@@ -6,17 +6,18 @@ from nonebot.message import handle_event
 from nonebot.adapters import Adapter
 from nonebot.adapters import Bot as BaseBot
 
-from .config import BaseInfo
-from .terminal import console_view
-from .event import Event, MessageEvent
+from asyncio import create_task
+
+from .terminal import terminal
+from .event import Event, MessageEvent, Robot
 from .message import Message, MessageSegment
 
 
 class Bot(BaseBot):
     @overrides(BaseBot)
-    def __init__(self, adapter: "Adapter", bot_config: BaseInfo):
-        super().__init__(adapter, "0")
-        self.bot_config: BaseInfo = bot_config
+    def __init__(self, adapter: "Adapter", bot_config: Robot):
+        super().__init__(adapter, str(bot_config.user_id))
+        self.bot_config: Robot = bot_config
 
     @property
     def type(self) -> str:
@@ -30,9 +31,11 @@ class Bot(BaseBot):
         **kwargs: Any,
     ) -> Any:
         if isinstance(event, MessageEvent):
-            event.user_info = self.bot_config
-            await console_view.send_message(event, message)
+            await terminal.body.chat_view.send_message(
+                robot=self.bot_config,
+                message=message
+            )
 
     async def handle_event(self, event: Event) -> None:
-        """处理收到的事件。"""
-        await handle_event(self, event)
+        """处理收到的事件"""
+        create_task(handle_event(self, event))

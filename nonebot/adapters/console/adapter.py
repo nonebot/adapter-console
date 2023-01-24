@@ -7,19 +7,22 @@ from nonebot.typing import overrides
 from nonebot.adapters import Adapter as BaseAdapter
 
 from .bot import Bot
-from .event import Event
-from .config import BotConfig
-from .terminal import console_view
+from .event import Event, Robot
+from .terminal import terminal
 
 
 class Adapter(BaseAdapter):
     @overrides(BaseAdapter)
     def __init__(self, driver: Driver, **kwargs: Any) -> None:
         super().__init__(driver, **kwargs)
-        self.bot = Bot(self, BotConfig(user_id="0"))
+        self.bot = Bot(self, Robot(
+            user_id="114514",
+            nickname="bot"
+        ))
 
-        @console_view.on.append
+        @terminal.add_handle_event
         async def _handle_event(event: Event) -> None:
+            event.self_id = int(self.bot.bot_config.user_id)
             await self.bot.handle_event(event)
 
         self.setup()
@@ -32,15 +35,17 @@ class Adapter(BaseAdapter):
     @overrides(BaseAdapter)
     async def _call_api(self, bot: Bot, api: str, **data: Any) -> Any:
         if api == "send_message":
-            await console_view.client.send_message(bot.bot_config, **data)
+            await terminal.body.chat_view.send_message(bot.bot_config, **data)
 
     def setup(self):
         @self.driver.on_startup
         async def _start() -> None:
-            create_task(console_view.run())
-            self.bot_connect(self.bot)
+            create_task(terminal.run_async())
+            # create_task(console_view.run())
+            # self.bot_connect(self.bot)
 
         @self.driver.on_shutdown
         async def _stop() -> None:
-            await console_view.shutdown()
-            self.bot_disconnect(self.bot)
+            await terminal.shutdown()
+            # await console_view.shutdown()
+            # self.bot_disconnect(self.bot)

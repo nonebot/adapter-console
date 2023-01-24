@@ -60,6 +60,8 @@ class MessageSegment(BaseMessageSegment["Message"]):
 
 
 class Message(BaseMessage[MessageSegment]):
+    """Console 消息"""
+
     @classmethod
     @overrides(BaseMessage)
     def get_segment_class(cls) -> Type[MessageSegment]:
@@ -72,6 +74,9 @@ class Message(BaseMessage[MessageSegment]):
         return super(Message, self).__add__(
             MessageSegment.text(other) if isinstance(other, str) else other
         )
+    
+    def __repr__(self) -> str:
+        return "".join(repr(seg) for seg in self)
 
     @overrides(BaseMessage)
     def __radd__(
@@ -91,10 +96,8 @@ class Message(BaseMessage[MessageSegment]):
 
     @staticmethod
     @overrides(BaseMessage)
-    def _construct(
-        msg: Union[str, Mapping, Iterable[Mapping]]
-    ) -> Iterable[MessageSegment]:
-        yield MessageSegment.text(msg)  # type: ignore
+    def _construct(msg: str) -> Iterable[MessageSegment]:
+        yield MessageSegment.text(msg)
 
     @overrides(BaseMessage)
     def extract_plain_text(self) -> str:
