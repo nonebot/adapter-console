@@ -21,9 +21,9 @@ class Adapter(BaseAdapter):
         self.bot = Bot(self, BOT_ID)
 
         self._task: Optional[asyncio.Task] = None
-        self.frontend = Frontend(self)
         self.clients: List[Callable[[Bot, str, Dict[str, Any]], Awaitable[Any]]] = []
 
+        self.frontend = Frontend(self)
         self.setup()
 
     @staticmethod
