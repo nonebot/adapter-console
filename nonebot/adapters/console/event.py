@@ -1,37 +1,33 @@
-from typing import Literal
+from typing import List, Literal
+
 from pydantic import BaseModel
 from nonebot.typing import overrides
+from nonebot.utils import escape_tag
 
 from nonebot.adapters import Event as BaseEvent
 
 from .message import Message
 
 
-class BaseIcon(BaseModel):
-    icon: str
-
-
-class BaseInfo(BaseModel):
-    user_id: str
-    nickname: str
-
-
-class User(BaseInfo, BaseIcon):
+class User(BaseModel):
     """用户"""
-    icon: str = "👤"
-    is_me: bool = False
-    group_id: int
+
+    avatar: str = "👤"
+    nickname: str = "user"
 
 
-class Robot(BaseIcon, BaseInfo):
+class Robot(User):
     """机器人"""
-    icon: str = "🤖"
+
+    avatar: str = "🤖"
+    nickname: str = "bot"
 
 
 class Event(BaseEvent):
     time: int
-    self_id: int
+    self_id: str
     post_type: str
+    user: User
 
     @overrides(BaseEvent)
     def get_type(self) -> str:
@@ -65,23 +61,19 @@ class Event(BaseEvent):
 
 class MessageEvent(Event):
     post_type: Literal["message"] = "message"
-    sender: BaseInfo
     message: Message
 
     @overrides(Event)
     def get_user_id(self) -> str:
-        if self.sender:
-            return self.sender.user_id
-        return ""
+        return self.user.nickname
 
     @overrides(Event)
     def get_message(self) -> Message:
-        print("get_msg", self.message, sep="")
         return self.message
 
     @overrides(Event)
     def get_session_id(self) -> str:
-        return self.sender.user_id
+        return self.user.nickname
 
     @overrides(Event)
     def is_tome(self) -> bool:
@@ -89,8 +81,18 @@ class MessageEvent(Event):
 
     @overrides(Event)
     def get_event_description(self) -> str:
-        return f"{self.sender.nickname} from {self.get_message()}"
+        texts: List[str] = []
+        msg_string: List[str] = []
+        for seg in self.message:
+            if seg.is_text():
+                texts.append(str(seg))
+            else:
+                msg_string.extend(
+                    (escape_tag("".join(texts)), f"<le>{escape_tag(str(seg))}</le>")
+                )
+                texts.clear()
+        msg_string.append(escape_tag("".join(texts)))
+        return f"Message from {self.user.nickname} {self.get_message()}"
 
-    @overrides(Event)
-    def get_plaintext(self) -> str:
-        return self.get_message().extract_plain_text()
+
+__all__ = ["User", "Robot", "Event", "MessageEvent"]
