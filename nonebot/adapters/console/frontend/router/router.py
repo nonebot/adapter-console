@@ -21,12 +21,15 @@ class RouterView(Widget):
 
         self.current_view: Optional[Widget] = None
 
+    async def on_mount(self):
+        self.current_route = self.default_route
+
     async def watch_current_route(self, current_route: str):
         if self.current_view:
             await self.current_view.remove()
 
         self.current_view = self.routes[current_route]()
-        self.mount(self.current_view)
+        await self.mount(self.current_view)
 
     def action_to(self, route: str):
         self.current_route = route
