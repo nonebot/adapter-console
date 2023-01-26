@@ -12,6 +12,13 @@ class RouteChange(Message):
 
 
 class RouterView(Widget):
+    DEFAULT_CSS = """
+    RouterView {
+        height: 100%;
+        width: 100%;
+    }
+    """
+
     current_route = Reactive[Optional[str]](None)
 
     def __init__(self, routes: Dict[str, Callable[[], Widget]], default_route: str):

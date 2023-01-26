@@ -4,6 +4,35 @@ from textual.reactive import Reactive, watch
 
 
 class Toolbar(Widget):
+    DEFAULT_CSS = """
+    Toolbar {
+        layout: horizontal;
+        height: 3;
+        width: 100%;
+        dock: top;
+        border: solid $accent;
+    }
+
+    Toolbar Static.left {
+        width: 3;
+        dock: left;
+    }
+
+    Toolbar Static.center {
+        width: 100%;
+        content-align: center middle;
+    }
+
+    Toolbar Static.right {
+        width: 3;
+        dock: right;
+    }
+
+    Toolbar Static.mr-3 {
+        margin-right: 3;
+    }
+    """
+
     title: Reactive[str] = Reactive("Bot")
 
     def __init__(self):

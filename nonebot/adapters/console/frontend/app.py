@@ -15,8 +15,6 @@ if TYPE_CHECKING:
 
 
 class Frontend(App):
-    CSS_PATH = Path(__file__).parent / "app.css"
-
     BINDINGS = [
         Binding("ctrl+d", "toggle_dark", "Toggle dark mode"),
         Binding("ctrl+s", "screenshot", "Save a screenshot"),

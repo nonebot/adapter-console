@@ -9,6 +9,23 @@ SHOW_LOG_BREAKPOINT = 120
 
 
 class HorizontalView(Widget):
+    DEFAULT_CSS = """
+    HorizontalView {
+        layout: horizontal;
+        height: 100%;
+        width: 100%;
+    }
+
+    HorizontalView > * {
+        height: 100%;
+        width: 100%;
+    }
+
+    HorizontalView > .-w-50 {
+        width: 50% !important;
+    }
+    """
+
     show_log: Reactive[bool] = Reactive(True)
 
     def __init__(self):
