@@ -1,6 +1,7 @@
-from typing import Dict
+from typing import Dict, Callable, Optional
 
 from textual.widget import Widget
+from textual.reactive import Reactive
 from textual.message import Message, MessageTarget
 
 
@@ -11,25 +12,24 @@ class RouteChange(Message):
 
 
 class RouterView(Widget):
-    def __init__(self, routes: Dict[str, Widget], default_route: str):
+    current_route = Reactive[Optional[str]](None)
+
+    def __init__(self, routes: Dict[str, Callable[[], Widget]], default_route: str):
         super().__init__()
         self.routes = routes
+        self.default_route = default_route
 
-        self.current_route = default_route
+        self.current_view: Optional[Widget] = None
 
-    def compose(self):
-        yield from self.routes.values()
+    async def watch_current_route(self, current_route: str):
+        if self.current_view:
+            await self.current_view.remove()
 
-    def update(self):
-        for r, w in self.routes.items():
-            w.display = r == self.current_route
-
-    def on_mount(self):
-        self.update()
+        self.current_view = self.routes[current_route]()
+        self.mount(self.current_view)
 
     def action_to(self, route: str):
         self.current_route = route
-        self.update()
 
     def on_route_change(self, event: RouteChange):
         self.action_to(event.route)

@@ -115,7 +115,7 @@ class Text(MessageSegment):
     def __rich_console__(
         self, console: "Console", options: "ConsoleOptions"
     ) -> "RenderResult":
-        yield RichText(self.data["text"])
+        yield RichText(self.data["text"], end="")
 
 
 class EmojiData(TypedDict):

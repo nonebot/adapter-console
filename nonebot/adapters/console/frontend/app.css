@@ -1,3 +1,12 @@
 Header > HeaderIcon {
   color: #ea5252;
 }
+
+RouterView {
+  height: 100%;
+  width: 100%;
+}
+
+HorizontalView {
+  layout: horizontal;
+}

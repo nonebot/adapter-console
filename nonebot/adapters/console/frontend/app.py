@@ -6,9 +6,9 @@ from textual.binding import Binding
 
 from .router import RouterView
 from .views.log_view import LogView
-from .views.chatroom import ChatRoom
 from .components.footer import Footer
 from .components.header import Header
+from .views.horizontal import HorizontalView
 
 if TYPE_CHECKING:
     from nonebot.adapters.console import Bot, Event, Adapter
@@ -22,7 +22,7 @@ class Frontend(App):
         Binding("ctrl+s", "screenshot", "Save a screenshot"),
     ]
 
-    ROUTES = {"chatroom": ChatRoom(), "log": LogView()}
+    ROUTES = {"main": lambda: HorizontalView(), "log": lambda: LogView()}
 
     def __init__(self, adapter: "Adapter"):
         super().__init__()
@@ -34,7 +34,7 @@ class Frontend(App):
 
     def compose(self):
         yield Header()
-        yield RouterView(self.ROUTES, "chatroom")
+        yield RouterView(self.ROUTES, "main")
         yield Footer()
 
     async def _handle_api(self, bot: "Bot", api: str, data: Dict[str, Any]):

@@ -1,6 +1,8 @@
 from textual.widget import Widget
-from textual.widgets import TextLog
+
+from ..components.log import LogPanel
 
 
 class LogView(Widget):
-    ...
+    def compose(self):
+        yield LogPanel()

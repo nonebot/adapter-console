@@ -92,7 +92,7 @@ class MessageEvent(Event):
                 )
                 texts.clear()
         msg_string.append(escape_tag("".join(texts)))
-        return f"Message from {self.user.nickname} {self.get_message()}"
+        return f"Message from {self.user.nickname} {''.join(msg_string)!r}"
 
 
 __all__ = ["User", "Robot", "Event", "MessageEvent"]
