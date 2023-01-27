@@ -1,5 +1,5 @@
 import re
-from typing import Any, Union
+from typing import TYPE_CHECKING, Any, Union
 
 from nonebot.typing import overrides
 from nonebot.message import handle_event
@@ -30,6 +30,11 @@ def _check_nickname(bot: "Bot", event: MessageEvent) -> None:
 
 
 class Bot(BaseBot):
+    if TYPE_CHECKING:
+
+        async def send_msg(self, user_id: str, message: Message, **kwargs: Any) -> Any:
+            ...
+
     @overrides(BaseBot)
     def __init__(self, adapter: "Adapter", self_id: str):
         super().__init__(adapter, self_id)
@@ -49,8 +54,8 @@ class Bot(BaseBot):
         full_message = Message()
         full_message += message
 
-        return await self.call_api(
-            "send_msg", user_id=event.user.nickname, message=full_message, **kwargs
+        return await self.send_msg(
+            user_id=event.user.nickname, message=full_message, **kwargs
         )
 
     async def handle_event(self, event: Event) -> None:

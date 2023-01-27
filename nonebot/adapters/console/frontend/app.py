@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Optional
 from contextlib import redirect_stderr, redirect_stdout
 
@@ -7,6 +8,9 @@ from textual.app import App
 from textual.events import Unmount
 from textual.binding import Binding
 from nonebot.log import logger, default_filter, default_format
+
+import nonebot
+from nonebot.adapters.console import MessageEvent
 
 from .storage import Storage
 from .router import RouterView
@@ -66,7 +70,16 @@ class Frontend(App):
         self._redirect_stdout.__exit__(None, None, None)
 
     async def _handle_api(self, bot: "Bot", api: str, data: Dict[str, Any]):
-        self.log(f"API: {api} {data}")
+        if api == "send_msg":
+            self.storage.write_chat(
+                MessageEvent(
+                    time=datetime.now(),
+                    self_id=bot.self_id,
+                    post_type="message",
+                    message=data["message"],
+                    user=bot.info,
+                )
+            )
 
     async def action_post_event(self, event: "Event"):
         self.adapter.post_event(event)

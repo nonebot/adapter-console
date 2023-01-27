@@ -1,15 +1,23 @@
 from dataclasses import field, dataclass
-from typing import Any, List, Tuple, Callable
+from typing import TYPE_CHECKING, Any, List, Tuple, Callable
 
 from rich.console import RenderableType
 
+if TYPE_CHECKING:
+    from nonebot.adapters.console import MessageEvent
+
 MAX_LOG_RECORDS = 500
+MAX_MSG_RECORDS = 500
 
 
 @dataclass
 class Storage:
     log_history: List[RenderableType] = field(default_factory=list)
     log_watchers: List[Callable[[Tuple[RenderableType, ...]], Any]] = field(
+        default_factory=list
+    )
+    chat_history: List["MessageEvent"] = field(default_factory=list)
+    chat_watchers: List[Callable[[Tuple["MessageEvent", ...]], Any]] = field(
         default_factory=list
     )
 
@@ -32,3 +40,23 @@ class Storage:
     def emit_log_watcher(self, *logs: RenderableType) -> None:
         for watcher in self.log_watchers:
             watcher(logs)
+
+    def write_chat(self, *messages: "MessageEvent") -> None:
+        self.chat_history.extend(messages)
+        if len(self.chat_history) > MAX_MSG_RECORDS:
+            self.chat_history = self.chat_history[-MAX_MSG_RECORDS:]
+        self.emit_chat_watcher(*messages)
+
+    def add_chat_watcher(
+        self, watcher: Callable[[Tuple["MessageEvent", ...]], Any]
+    ) -> None:
+        self.chat_watchers.append(watcher)
+
+    def remove_chat_watcher(
+        self, watcher: Callable[[Tuple["MessageEvent", ...]], Any]
+    ) -> None:
+        self.chat_watchers.remove(watcher)
+
+    def emit_chat_watcher(self, *messages: "MessageEvent") -> None:
+        for watcher in self.chat_watchers:
+            watcher(messages)

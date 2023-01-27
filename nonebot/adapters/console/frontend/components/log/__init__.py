@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Iterable, cast
 
 from textual.widget import Widget
 from textual.events import Unmount
@@ -34,13 +34,12 @@ class LogPanel(Widget):
         yield self.output
 
     def on_mount(self):
-        for log in self.storage.log_history:
-            self.output.write(log)
+        self.on_log(self.storage.log_history)
         self.storage.add_log_watcher(self.on_log)
 
     def on_unmount(self, event: Unmount):
         self.storage.remove_log_watcher(self.on_log)
 
-    def on_log(self, logs: tuple[RenderableType, ...]) -> None:
+    def on_log(self, logs: Iterable[RenderableType]) -> None:
         for log in logs:
             self.output.write(log)

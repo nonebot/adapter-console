@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Literal
 
 from pydantic import BaseModel
@@ -24,7 +25,7 @@ class Robot(User):
 
 
 class Event(BaseEvent):
-    time: int
+    time: datetime
     self_id: str
     post_type: str
     user: User
