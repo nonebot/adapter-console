@@ -5,7 +5,7 @@ from textual.reactive import Reactive
 from textual.message import Message, MessageTarget
 
 
-class RouteChange(Message):
+class RouteChange(Message, bubble=True):
     def __init__(self, sender: MessageTarget, route: str):
         super().__init__(sender)
         self.route = route
@@ -42,4 +42,5 @@ class RouterView(Widget):
         self.current_route = route
 
     def on_route_change(self, event: RouteChange):
+        event.stop()
         self.action_to(event.route)

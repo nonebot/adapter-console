@@ -1,6 +1,14 @@
+from typing import TYPE_CHECKING, cast
+
 from textual.widget import Widget
 from textual.widgets import Static
-from textual.reactive import Reactive, watch
+from textual.reactive import Reactive
+
+from ...router import RouteChange
+from ..general.action import Action
+
+if TYPE_CHECKING:
+    from ...views.horizontal import HorizontalView
 
 
 class Toolbar(Widget):
@@ -10,26 +18,19 @@ class Toolbar(Widget):
         height: 3;
         width: 100%;
         dock: top;
-        border: solid $accent;
+        border: round $foreground;
     }
 
-    Toolbar Static.left {
-        width: 3;
-        dock: left;
-    }
-
-    Toolbar Static.center {
+    Toolbar Static {
         width: 100%;
         content-align: center middle;
     }
 
-    Toolbar Static.right {
+    Toolbar Action {
         width: 3;
-        dock: right;
     }
-
-    Toolbar Static.mr-3 {
-        margin-right: 3;
+    Toolbar Action.mr {
+        margin-right: 4;
     }
     """
 
@@ -37,9 +38,9 @@ class Toolbar(Widget):
 
     def __init__(self):
         super().__init__()
-        self.exit_button = Static("❌", id="exit", classes="left")
-        self.settings_button = Static("⚙️", id="settings", classes="right")
-        self.log_button = Static("📝", id="log", classes="right")
+        self.exit_button = Action("❌", id="exit", classes="left")
+        self.settings_button = Action("⚙️", id="settings", classes="right mr")
+        self.log_button = Action("📝", id="log", classes="right")
 
     def compose(self):
         yield self.exit_button
@@ -47,9 +48,15 @@ class Toolbar(Widget):
         yield self.settings_button
         yield self.log_button
 
-    def on_mount(self):
-        watch(self.app.query_one("HorizontalView"), "show_log", self.watch_show_log)
-
-    def watch_show_log(self, show_log):
-        self.settings_button.set_class(not show_log, "mr-3")
-        self.log_button.display = not show_log
+    async def on_action_pressed(self, event: Action.Pressed):
+        event.stop()
+        if event.action == self.exit_button:
+            self.app.exit()
+        elif event.action == self.settings_button:
+            ...
+        elif event.action == self.log_button:
+            view = cast("HorizontalView", self.app.query_one("HorizontalView"))
+            if view.can_show_log:
+                view.action_toggle_log_panel()
+            else:
+                self.emit_no_wait(RouteChange(self, "log"))

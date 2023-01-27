@@ -32,7 +32,7 @@ class Adapter(BaseAdapter):
         return "Console"
 
     def setup(self):
-        if not self.console_config.console_silent_mode:
+        if not self.console_config.console_headless_mode:
             self.driver.on_startup(self._start)
             self.driver.on_shutdown(self._shutdown)
 

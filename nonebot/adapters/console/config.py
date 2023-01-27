@@ -4,4 +4,4 @@ EMOJI = "😄😆😊😃😏😍😘😚😳😌😆😁😉😜😝😀😗�
 
 
 class Config(BaseModel):
-    console_silent_mode: bool = False
+    console_headless_mode: bool = False

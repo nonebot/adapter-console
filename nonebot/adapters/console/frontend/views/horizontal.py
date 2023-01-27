@@ -20,12 +20,16 @@ class HorizontalView(Widget):
         height: 100%;
         width: 100%;
     }
-
     HorizontalView > .-w-50 {
         width: 50% !important;
     }
+    
+    HorizontalView > LogPanel {
+        border-left: solid rgba(204, 204, 204, 0.7);
+    }
     """
 
+    can_show_log: Reactive[bool] = Reactive(False)
     show_log: Reactive[bool] = Reactive(True)
 
     def __init__(self):
@@ -40,10 +44,20 @@ class HorizontalView(Widget):
     def on_resize(self, event: Resize):
         self.responsive(event.size.width)
 
-    async def watch_show_log(self, show_log: bool):
-        self.log_panel.display = show_log
-        self.chatroom.set_class(show_log, "-w-50")
-        self.log_panel.set_class(show_log, "-w-50")
+    def watch_can_show_log(self, can_show_log: bool):
+        self._toggle_log_panel()
+
+    def watch_show_log(self, show_log: bool):
+        self._toggle_log_panel()
 
     def responsive(self, width: int) -> None:
-        self.show_log = width > SHOW_LOG_BREAKPOINT
+        self.can_show_log = width > SHOW_LOG_BREAKPOINT
+
+    def action_toggle_log_panel(self):
+        self.show_log = not self.show_log
+
+    def _toggle_log_panel(self):
+        show = self.can_show_log and self.show_log
+        self.log_panel.display = show
+        self.chatroom.set_class(show, "-w-50")
+        self.log_panel.set_class(show, "-w-50")

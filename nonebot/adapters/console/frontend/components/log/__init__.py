@@ -1,61 +1,46 @@
-from typing import List
-from contextlib import redirect_stderr, redirect_stdout
+from typing import TYPE_CHECKING, cast
 
-from rich.text import Text
 from textual.widget import Widget
 from textual.events import Unmount
 from textual.widgets import TextLog
+from rich.console import RenderableType
+
+if TYPE_CHECKING:
+    from ...app import Frontend
+    from ...storage import Storage
 
 
-class _FakeIO:
-    def __init__(self, text_log: TextLog) -> None:
-        self.text_log = text_log
-        self._buffer: List[str] = []
-
-    def write(self, string: str) -> None:
-        self._buffer.append(string)
-
-        # By default, `print` adds a "\n" suffix which results in a buffer
-        # flush. You can choose a different suffix with the `end` parameter.
-        # If you modify the `end` parameter to something other than "\n",
-        # then `print` will no longer flush automatically. However, if a
-        # string you are printing contains a "\n", that will trigger
-        # a flush after that string has been buffered, regardless of the value
-        # of `end`.
-        if "\n" in string:
-            self.flush()
-
-    def flush(self) -> None:
-        self._write_to_textlog()
-        self._buffer.clear()
-
-    def _write_to_textlog(self) -> None:
-        self.text_log.write(Text("".join(self._buffer), end=""))
+MAX_LINES = 1000
 
 
 class LogPanel(Widget):
     DEFAULT_CSS = """
     LogPanel > TextLog {
-        border-left: solid rgba(204, 204, 204, 0.7);
+        min-width: 60 !important;
+        scrollbar-size-vertical: 1;
     }
     """
 
     def __init__(self) -> None:
         super().__init__()
 
-        self.output = TextLog()
-        self._fake_output = _FakeIO(self.output)
+        self.output = TextLog(max_lines=MAX_LINES)
 
-        self._redirect_stdout = redirect_stdout(self._fake_output)  # type: ignore
-        self._redirect_stderr = redirect_stderr(self._fake_output)  # type: ignore
+    @property
+    def storage(self) -> "Storage":
+        return cast("Frontend", self.app).storage
 
     def compose(self):
         yield self.output
 
     def on_mount(self):
-        self._redirect_stdout.__enter__()
-        self._redirect_stderr.__enter__()
+        for log in self.storage.log_history:
+            self.output.write(log)
+        self.storage.add_log_watcher(self.on_log)
 
     def on_unmount(self, event: Unmount):
-        self._redirect_stderr.__exit__(None, None, None)
-        self._redirect_stdout.__exit__(None, None, None)
+        self.storage.remove_log_watcher(self.on_log)
+
+    def on_log(self, logs: tuple[RenderableType, ...]) -> None:
+        for log in logs:
+            self.output.write(log)
