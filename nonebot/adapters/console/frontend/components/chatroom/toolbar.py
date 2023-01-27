@@ -8,17 +8,22 @@ from ...router import RouteChange
 from ..general.action import Action
 
 if TYPE_CHECKING:
+    from ...app import Frontend
     from ...views.horizontal import HorizontalView
 
 
 class Toolbar(Widget):
     DEFAULT_CSS = """
+    $toolbar-border-type: round;
+    $toolbar-border-color: rgba(170, 170, 170, 0.7);
+    $toolbar-border: $toolbar-border-type $toolbar-border-color;
+
     Toolbar {
         layout: horizontal;
         height: 3;
         width: 100%;
         dock: top;
-        border: round $foreground;
+        border: $toolbar-border;
     }
 
     Toolbar Static {
@@ -38,15 +43,22 @@ class Toolbar(Widget):
 
     def __init__(self):
         super().__init__()
-        self.exit_button = Action("❌", id="exit", classes="left")
+        self.exit_button = Action("❌", id="exit", classes="left mr")
+        self.center_title = Static(self.title, classes="center")
         self.settings_button = Action("⚙️", id="settings", classes="right mr")
         self.log_button = Action("📝", id="log", classes="right")
 
     def compose(self):
         yield self.exit_button
-        yield Static(self.title, classes="center")
+        yield self.center_title
         yield self.settings_button
         yield self.log_button
+
+    def on_mount(self):
+        self.title = cast("Frontend", self.app).adapter.bot.info.nickname
+
+    def watch_title(self, title: str):
+        self.center_title.update(title)
 
     async def on_action_pressed(self, event: Action.Pressed):
         event.stop()

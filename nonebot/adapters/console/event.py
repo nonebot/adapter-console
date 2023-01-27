@@ -13,14 +13,14 @@ class User(BaseModel):
     """用户"""
 
     avatar: str = "👤"
-    nickname: str = "user"
+    nickname: str = "User"
 
 
 class Robot(User):
     """机器人"""
 
     avatar: str = "🤖"
-    nickname: str = "bot"
+    nickname: str = "Bot"
 
 
 class Event(BaseEvent):

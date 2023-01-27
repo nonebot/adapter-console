@@ -7,14 +7,16 @@ from textual.message import Message, MessageTarget
 
 class Action(Static, can_focus=True):
     DEFAULT_CSS = """
+    $action-active-color: $accent;
+    
     Action.left {
         dock: left;
     }
     Action.right {
         dock: right;
     }
-    Action:focus {
-        color: $accent;
+    Action:focus, Action:hover {
+        color: $action-active-color;
     }
     """
 

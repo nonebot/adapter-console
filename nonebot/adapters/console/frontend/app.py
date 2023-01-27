@@ -1,10 +1,12 @@
+import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any, Dict, Optional
 from contextlib import redirect_stderr, redirect_stdout
 
 from textual.app import App
 from textual.events import Unmount
 from textual.binding import Binding
+from nonebot.log import logger, default_filter, default_format
 
 from .storage import Storage
 from .router import RouterView
@@ -34,6 +36,7 @@ class Frontend(App):
 
         self.storage = Storage()
 
+        self._logger_id: Optional[int] = None
         self._fake_output = FakeIO(self.storage)
         self._redirect_stdout = redirect_stdout(self._fake_output)  # type: ignore
         self._redirect_stderr = redirect_stderr(self._fake_output)  # type: ignore
@@ -48,8 +51,17 @@ class Frontend(App):
     def on_mount(self):
         self._redirect_stdout.__enter__()
         self._redirect_stderr.__enter__()
+        self._logger_id = logger.add(
+            sys.stdout,
+            level=0,
+            diagnose=False,
+            filter=default_filter,
+            format=default_format,
+        )
 
     def on_unmount(self, event: Unmount):
+        if self._logger_id is not None:
+            logger.remove(self._logger_id)
         self._redirect_stderr.__exit__(None, None, None)
         self._redirect_stdout.__exit__(None, None, None)
 

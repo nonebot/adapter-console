@@ -8,12 +8,16 @@ from ..general.action import Action
 
 class Toolbar(Widget):
     DEFAULT_CSS = """
+    $toolbar-border-type: round;
+    $toolbar-border-color: rgba(170, 170, 170, 0.7);
+    $toolbar-border: $toolbar-border-type $toolbar-border-color;
+
     Toolbar {
         layout: horizontal;
         height: 3;
         width: 100%;
         dock: top;
-        border: round $foreground;
+        border: $toolbar-border;
     }
 
     Toolbar Static {
@@ -26,8 +30,6 @@ class Toolbar(Widget):
     }
     """
 
-    title: Reactive[str] = Reactive("Log")
-
     def __init__(self):
         super().__init__()
         self.back_button = Action("⬅️", id="back", classes="left")
@@ -35,7 +37,7 @@ class Toolbar(Widget):
 
     def compose(self):
         yield self.back_button
-        yield Static(self.title, classes="center")
+        yield Static("Log", classes="center")
         yield self.settings_button
 
     async def on_action_pressed(self, event: Action.Pressed):
