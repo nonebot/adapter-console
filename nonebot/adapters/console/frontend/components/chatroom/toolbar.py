@@ -9,6 +9,7 @@ from ..general.action import Action
 
 if TYPE_CHECKING:
     from ...app import Frontend
+    from .history import ChatHistory
     from ...views.horizontal import HorizontalView
 
 
@@ -22,8 +23,8 @@ class Toolbar(Widget):
         layout: horizontal;
         height: 3;
         width: 100%;
-        dock: top;
         border: $toolbar-border;
+        padding: 0 1;
     }
 
     Toolbar Static {
@@ -34,6 +35,9 @@ class Toolbar(Widget):
     Toolbar Action {
         width: 3;
     }
+    Toolbar Action.ml {
+        margin-left: 2;
+    }
     Toolbar Action.mr {
         margin-right: 4;
     }
@@ -43,14 +47,18 @@ class Toolbar(Widget):
 
     def __init__(self):
         super().__init__()
-        self.exit_button = Action("❌", id="exit", classes="left mr")
+        self.exit_button = Action("❌", id="exit", classes="left")
+        self.clear_button = Action("🗑️", id="clear", classes="left ml")
         self.center_title = Static(self.title, classes="center")
         self.settings_button = Action("⚙️", id="settings", classes="right mr")
         self.log_button = Action("📝", id="log", classes="right")
 
     def compose(self):
         yield self.exit_button
+        yield self.clear_button
+
         yield self.center_title
+
         yield self.settings_button
         yield self.log_button
 
@@ -64,6 +72,9 @@ class Toolbar(Widget):
         event.stop()
         if event.action == self.exit_button:
             self.app.exit()
+        elif event.action == self.clear_button:
+            history = cast("ChatHistory", self.app.query_one("ChatHistory"))
+            history.action_clear_history()
         elif event.action == self.settings_button:
             ...
         elif event.action == self.log_button:

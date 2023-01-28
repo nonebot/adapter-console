@@ -10,14 +10,15 @@ from nonebot.adapters import Event as BaseEvent
 from .message import Message
 
 
-class User(BaseModel):
+class User(BaseModel, frozen=True):
     """用户"""
 
+    id: str
     avatar: str = "👤"
     nickname: str = "User"
 
 
-class Robot(User):
+class Robot(User, frozen=True):
     """机器人"""
 
     avatar: str = "🤖"

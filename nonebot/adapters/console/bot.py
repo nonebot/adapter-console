@@ -38,7 +38,7 @@ class Bot(BaseBot):
     @overrides(BaseBot)
     def __init__(self, adapter: "Adapter", self_id: str):
         super().__init__(adapter, self_id)
-        self.info = Robot()
+        self.info = Robot(id=self_id)
 
     @property
     def type(self) -> str:

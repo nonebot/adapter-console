@@ -1,5 +1,6 @@
+import sys
 import asyncio
-from typing import Any, Dict, List, Callable, Optional, Awaitable
+from typing import TYPE_CHECKING, Any, Dict, List, Callable, Optional, Awaitable
 
 from nonebot.drivers import Driver
 from nonebot.typing import overrides
@@ -10,7 +11,9 @@ from . import BOT_ID
 from .bot import Bot
 from .event import Event
 from .config import Config
-from .frontend import Frontend
+
+if TYPE_CHECKING:
+    from .frontend import Frontend
 
 
 class Adapter(BaseAdapter):
@@ -21,9 +24,10 @@ class Adapter(BaseAdapter):
         self.bot = Bot(self, BOT_ID)
 
         self._task: Optional[asyncio.Task] = None
+        self._frontend: Optional["Frontend"] = None
+        self._stdout = sys.stdout
         self.clients: List[Callable[[Bot, str, Dict[str, Any]], Awaitable[Any]]] = []
 
-        self.frontend = Frontend(self)
         self.setup()
 
     @staticmethod
@@ -37,13 +41,17 @@ class Adapter(BaseAdapter):
             self.driver.on_shutdown(self._shutdown)
 
     async def _start(self) -> None:
-        self._task = asyncio.create_task(self.frontend.run_async())
+        from .frontend import Frontend
+
+        self._frontend = Frontend(self)
+        self._task = asyncio.create_task(self._frontend.run_async())
         self.bot_connect(self.bot)
 
     async def _shutdown(self) -> None:
         self.bot_disconnect(self.bot)
+        if self._frontend:
+            self._frontend.exit()
         if self._task:
-            self.frontend.exit()
             await self._task
 
     def add_client(self, client: Callable[[Bot, str, Dict[str, Any]], Awaitable[Any]]):

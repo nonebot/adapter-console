@@ -16,8 +16,8 @@ class Toolbar(Widget):
         layout: horizontal;
         height: 3;
         width: 100%;
-        dock: top;
         border: $toolbar-border;
+        padding: 0 1;
     }
 
     Toolbar Static {

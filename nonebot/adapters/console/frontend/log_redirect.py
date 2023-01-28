@@ -1,4 +1,4 @@
-from typing import List
+from typing import IO, List
 
 from rich.text import Text
 
@@ -9,6 +9,9 @@ class FakeIO:
     def __init__(self, storage: Storage) -> None:
         self.storage = storage
         self._buffer: List[str] = []
+
+    def isatty(self):
+        return True
 
     def write(self, string: str) -> None:
         self._buffer.append(string)

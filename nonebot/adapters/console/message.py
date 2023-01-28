@@ -6,6 +6,7 @@ from nonebot.typing import overrides
 from rich.text import Text as RichText
 from rich.emoji import Emoji as RichEmoji
 from rich.markdown import Markdown as RichMarkdown
+from rich.measure import Measurement, measure_renderables
 from rich.console import Console, RenderResult, JustifyMethod, ConsoleOptions
 
 from nonebot.adapters import Message as BaseMessage
@@ -100,6 +101,11 @@ class MessageSegment(BaseMessageSegment["Message"]):
     ) -> "RenderResult":
         raise NotImplementedError
 
+    def __rich_measure__(
+        self, console: "Console", options: "ConsoleOptions"
+    ) -> Measurement:
+        raise NotImplementedError
+
 
 class TextData(TypedDict):
     text: str
@@ -109,13 +115,22 @@ class Text(MessageSegment):
     type: Literal["text"]
     data: TextData
 
+    @property
+    def rich(self) -> RichText:
+        return RichText(self.data["text"], end="")
+
     def __str__(self) -> str:
-        return self.data["text"]
+        return str(self.rich)
 
     def __rich_console__(
         self, console: "Console", options: "ConsoleOptions"
     ) -> "RenderResult":
-        yield RichText(self.data["text"], end="")
+        yield self.rich
+
+    def __rich_measure__(
+        self, console: "Console", options: "ConsoleOptions"
+    ) -> Measurement:
+        return measure_renderables(console, options, (self.rich,))
 
 
 class EmojiData(TypedDict):
@@ -137,6 +152,11 @@ class Emoji(MessageSegment):
         self, console: "Console", options: "ConsoleOptions"
     ) -> "RenderResult":
         yield self.rich
+
+    def __rich_measure__(
+        self, console: "Console", options: "ConsoleOptions"
+    ) -> Measurement:
+        return measure_renderables(console, options, (self.rich,))
 
 
 class MarkupData(TypedDict):
@@ -167,6 +187,11 @@ class Markup(MessageSegment):
     ) -> "RenderResult":
         yield self.rich
 
+    def __rich_measure__(
+        self, console: "Console", options: "ConsoleOptions"
+    ) -> Measurement:
+        return measure_renderables(console, options, (self.rich,))
+
 
 class MarkdownData(TypedDict):
     markup: str
@@ -190,6 +215,11 @@ class Markdown(MessageSegment):
         self, console: "Console", options: "ConsoleOptions"
     ) -> "RenderResult":
         yield self.rich
+
+    def __rich_measure__(
+        self, console: "Console", options: "ConsoleOptions"
+    ) -> Measurement:
+        return measure_renderables(console, options, (self.rich,))
 
 
 class Message(BaseMessage[MessageSegment]):
@@ -233,3 +263,8 @@ class Message(BaseMessage[MessageSegment]):
         self, console: "Console", options: "ConsoleOptions"
     ) -> "RenderResult":
         yield from self
+
+    def __rich_measure__(
+        self, console: "Console", options: "ConsoleOptions"
+    ) -> Measurement:
+        return measure_renderables(console, options, self)

@@ -3,8 +3,7 @@ from typing import TYPE_CHECKING, Any, List, Tuple, Callable
 
 from rich.console import RenderableType
 
-if TYPE_CHECKING:
-    from nonebot.adapters.console import MessageEvent
+from nonebot.adapters.console import User, MessageEvent
 
 MAX_LOG_RECORDS = 500
 MAX_MSG_RECORDS = 500
@@ -12,14 +11,20 @@ MAX_MSG_RECORDS = 500
 
 @dataclass
 class Storage:
+    current_user: User = field(default_factory=lambda: User(id="console_user"))
+
     log_history: List[RenderableType] = field(default_factory=list)
     log_watchers: List[Callable[[Tuple[RenderableType, ...]], Any]] = field(
         default_factory=list
     )
-    chat_history: List["MessageEvent"] = field(default_factory=list)
-    chat_watchers: List[Callable[[Tuple["MessageEvent", ...]], Any]] = field(
+
+    chat_history: List[MessageEvent] = field(default_factory=list)
+    chat_watchers: List[Callable[[Tuple[MessageEvent, ...]], Any]] = field(
         default_factory=list
     )
+
+    def set_user(self, user: User):
+        self.current_user = user
 
     def write_log(self, *logs: RenderableType) -> None:
         self.log_history.extend(logs)

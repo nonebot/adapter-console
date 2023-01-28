@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 class ChatHistory(Widget):
     DEFAULT_CSS = """
     ChatHistory {
+        layout: vertical;
         height: 100%;
         overflow-y: scroll;
         scrollbar-size-vertical: 1;
@@ -51,3 +52,4 @@ class ChatHistory(Widget):
     def action_clear_history(self):
         for msg in self.walk_children():
             cast(Widget, msg).remove()
+        self.storage.chat_history.clear()

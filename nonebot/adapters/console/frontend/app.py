@@ -1,16 +1,13 @@
-import sys
-from pathlib import Path
+import contextlib
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Optional
-from contextlib import redirect_stderr, redirect_stdout
+from typing import Any, Dict, TextIO, Optional, cast
 
 from textual.app import App
-from textual.events import Unmount
+from textual.widgets import Input
 from textual.binding import Binding
-from nonebot.log import logger, default_filter, default_format
+from nonebot.log import logger, logger_id, default_filter, default_format
 
-import nonebot
-from nonebot.adapters.console import MessageEvent
+from nonebot.adapters.console import Bot, Event, Adapter, Message, MessageEvent
 
 from .storage import Storage
 from .router import RouterView
@@ -20,19 +17,17 @@ from .components.footer import Footer
 from .components.header import Header
 from .views.horizontal import HorizontalView
 
-if TYPE_CHECKING:
-    from nonebot.adapters.console import Bot, Event, Adapter
-
 
 class Frontend(App):
     BINDINGS = [
         Binding("ctrl+d", "toggle_dark", "Toggle dark mode"),
         Binding("ctrl+s", "screenshot", "Save a screenshot"),
+        Binding("ctrl+l", "focus_input", "Focus input"),
     ]
 
     ROUTES = {"main": lambda: HorizontalView(), "log": lambda: LogView()}
 
-    def __init__(self, adapter: "Adapter"):
+    def __init__(self, adapter: Adapter):
         super().__init__()
         self.adapter = adapter
         self.title = "NoneBot"
@@ -41,9 +36,10 @@ class Frontend(App):
         self.storage = Storage()
 
         self._logger_id: Optional[int] = None
-        self._fake_output = FakeIO(self.storage)
-        self._redirect_stdout = redirect_stdout(self._fake_output)  # type: ignore
-        self._redirect_stderr = redirect_stderr(self._fake_output)  # type: ignore
+        self._should_restore_logger: bool = False
+        self._fake_output = cast(TextIO, FakeIO(self.storage))
+        self._redirect_stdout = contextlib.redirect_stdout(self._fake_output)
+        self._redirect_stderr = contextlib.redirect_stderr(self._fake_output)
 
         self.adapter.add_client(self._handle_api)
 
@@ -52,24 +48,38 @@ class Frontend(App):
         yield RouterView(self.ROUTES, "main")
         yield Footer()
 
-    def on_mount(self):
-        self._redirect_stdout.__enter__()
-        self._redirect_stderr.__enter__()
+    def on_load(self):
+        with contextlib.suppress(ValueError):
+            logger.remove(logger_id)
+            self._should_restore_logger = True
         self._logger_id = logger.add(
-            sys.stdout,
+            self._fake_output,
             level=0,
             diagnose=False,
             filter=default_filter,
             format=default_format,
         )
 
-    def on_unmount(self, event: Unmount):
-        if self._logger_id is not None:
-            logger.remove(self._logger_id)
+    def on_mount(self):
+        self._redirect_stdout.__enter__()
+        self._redirect_stderr.__enter__()
+
+    def on_unmount(self):
         self._redirect_stderr.__exit__(None, None, None)
         self._redirect_stdout.__exit__(None, None, None)
 
-    async def _handle_api(self, bot: "Bot", api: str, data: Dict[str, Any]):
+        if self._logger_id is not None:
+            logger.remove(self._logger_id)
+        if self._should_restore_logger:
+            logger.add(
+                self.adapter._stdout,
+                level=0,
+                diagnose=False,
+                filter=default_filter,
+                format=default_format,
+            )
+
+    async def _handle_api(self, bot: Bot, api: str, data: Dict[str, Any]):
         if api == "send_msg":
             self.storage.write_chat(
                 MessageEvent(
@@ -81,5 +91,22 @@ class Frontend(App):
                 )
             )
 
-    async def action_post_event(self, event: "Event"):
+    def action_focus_input(self):
+        with contextlib.suppress(Exception):
+            self.query_one(Input).focus()
+
+    def action_post_message(self, message: str):
+        self.action_post_event(
+            MessageEvent(
+                time=datetime.now(),
+                self_id=self.adapter.bot.self_id,
+                post_type="message",
+                message=Message(message),
+                user=self.storage.current_user,
+            )
+        )
+
+    def action_post_event(self, event: Event):
+        if isinstance(event, MessageEvent):
+            self.storage.write_chat(event)
         self.adapter.post_event(event)

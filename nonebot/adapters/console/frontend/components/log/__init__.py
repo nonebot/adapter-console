@@ -15,7 +15,11 @@ MAX_LINES = 1000
 
 class LogPanel(Widget):
     DEFAULT_CSS = """
+    LogPanel {
+        layout: vertical;
+    }
     LogPanel > TextLog {
+        padding: 0 1;
         min-width: 60 !important;
         scrollbar-size-vertical: 1;
     }
@@ -24,7 +28,7 @@ class LogPanel(Widget):
     def __init__(self) -> None:
         super().__init__()
 
-        self.output = TextLog(max_lines=MAX_LINES)
+        self.output = TextLog(max_lines=MAX_LINES, min_width=60, wrap=True)
 
     @property
     def storage(self) -> "Storage":

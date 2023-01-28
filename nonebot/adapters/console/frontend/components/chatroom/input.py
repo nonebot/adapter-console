@@ -1,5 +1,10 @@
+from typing import TYPE_CHECKING, cast
+
 from textual.widget import Widget
-from textual.widgets import Input as TextualInput
+from textual.widgets import Input
+
+if TYPE_CHECKING:
+    from ...app import Frontend
 
 
 class InputBox(Widget):
@@ -12,9 +17,9 @@ class InputBox(Widget):
     $input-border-active: $input-border-type $input-border-active-color;
 
     InputBox {
+        layout: horizontal;
         height: auto;
         width: 100%;
-        dock: bottom;
     }
 
     InputBox > Input {
@@ -29,7 +34,16 @@ class InputBox(Widget):
 
     def __init__(self):
         super().__init__()
-        self.input = TextualInput(placeholder="Send Message")
+        self.input = Input(placeholder="Send Message")
+
+    @property
+    def app(self) -> "Frontend":
+        return cast("Frontend", super().app)
 
     def compose(self):
         yield self.input
+
+    async def on_input_submitted(self, event: Input.Submitted):
+        event.stop()
+        self.input.value = ""
+        self.app.action_post_message(event.value)
