@@ -5,21 +5,21 @@ description = "console adapter for nonebot2"
 authors = ["MelodyKnit <yanximelody@gmail.com>"]
 readme = "README.md"
 license = "MIT"
-
 packages = [
   { include = "nonebot" }
 ] 
 
 [tool.poetry.dependencies]
 python = "^3.8.0"
+textual = "^0.10.1"
 nonebot2 = "^2.0.0-beta.1"
-textual = "0.1.18"
 
 [tool.poetry.group.dev.dependencies]
 isort = "^5.10.1"
 black = "^22.1.0"
+nonemoji = "^0.1.3"
 pre-commit = "^2.16.0"
-nonebot2 = { git = "https://github.com/nonebot/nonebot2.git" }
+textual = { version = "^0.10.1", extras = ["dev"] }
 
 [tool.black]
 line-length = 88

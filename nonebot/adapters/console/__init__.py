@@ -1,18 +1,7 @@
-from .adapter import Adapter
-from .terminal import print, console_view
+BOT_ID = "console"
 
-
-async def shutdown():
-    await console_view.shutdown()
-
-
-async def start():
-    await console_view.run()
-
-
-__all__ = [
-    "Adapter",
-    "shutdown",
-    "start",
-    "print",
-]
+from .event import *
+from .bot import Bot as Bot
+from .adapter import Adapter as Adapter
+from .message import Message as Message
+from .message import MessageSegment as MessageSegment
