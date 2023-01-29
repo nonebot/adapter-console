@@ -38,8 +38,8 @@ class Frontend(App):
         self._logger_id: Optional[int] = None
         self._should_restore_logger: bool = False
         self._fake_output = cast(TextIO, FakeIO(self.storage))
-        self._redirect_stdout = contextlib.redirect_stdout(self._fake_output)
-        self._redirect_stderr = contextlib.redirect_stderr(self._fake_output)
+        self._redirect_stdout: Optional[contextlib.redirect_stdout[TextIO]] = None
+        self._redirect_stderr: Optional[contextlib.redirect_stderr[TextIO]] = None
 
         self.adapter.add_client(self._handle_api)
 
@@ -61,15 +61,27 @@ class Frontend(App):
         )
 
     def on_mount(self):
-        self._redirect_stdout.__enter__()
-        self._redirect_stderr.__enter__()
+        with contextlib.suppress(Exception):
+            stdout = contextlib.redirect_stdout(self._fake_output)
+            stdout.__enter__()
+            self._redirect_stdout = stdout
+
+        with contextlib.suppress(Exception):
+            stderr = contextlib.redirect_stderr(self._fake_output)
+            stderr.__enter__()
+            self._redirect_stderr = stderr
 
     def on_unmount(self):
-        self._redirect_stderr.__exit__(None, None, None)
-        self._redirect_stdout.__exit__(None, None, None)
+        if self._redirect_stderr is not None:
+            self._redirect_stderr.__exit__(None, None, None)
+            self._redirect_stderr = None
+        if self._redirect_stdout is not None:
+            self._redirect_stdout.__exit__(None, None, None)
+            self._redirect_stdout = None
 
         if self._logger_id is not None:
             logger.remove(self._logger_id)
+            self._logger_id = None
         if self._should_restore_logger:
             logger.add(
                 self.adapter._stdout,
@@ -78,6 +90,7 @@ class Frontend(App):
                 filter=default_filter,
                 format=default_format,
             )
+            self._should_restore_logger = False
 
     async def _handle_api(self, bot: Bot, api: str, data: Dict[str, Any]):
         if api == "send_msg":

@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING, cast
 
 from textual.widget import Widget
 from textual.widgets import Input
+from textual.binding import Binding
 
 if TYPE_CHECKING:
     from ...app import Frontend
@@ -32,6 +33,10 @@ class InputBox(Widget):
     }
     """
 
+    BINDINGS = [
+        Binding("escape", "reset_focus", "Reset focus", show=False),
+    ]
+
     def __init__(self):
         super().__init__()
         self.input = Input(placeholder="Send Message")
@@ -47,3 +52,6 @@ class InputBox(Widget):
         event.stop()
         self.input.value = ""
         self.app.action_post_message(event.value)
+
+    def action_reset_focus(self):
+        self.input.reset_focus()

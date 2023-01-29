@@ -17,7 +17,7 @@ class ChatHistory(Widget):
     ChatHistory {
         layout: vertical;
         height: 100%;
-        overflow-y: scroll;
+        overflow: hidden scroll;
         scrollbar-size-vertical: 1;
     }
     """

@@ -42,6 +42,7 @@ class Message(Widget):
         height: auto;
         width: 100%;
         align-vertical: top;
+        transition: offset 500ms out_cubic;
     }
     Message.left {
         align-horizontal: left;
@@ -49,12 +50,21 @@ class Message(Widget):
     Message.right {
         align-horizontal: right;
     }
+
+    Message.left.-hidden {
+        offset-x: -100%;
+    }
+    Message.right.-hidden {
+        offset-x: 100%;
+    }
     """
 
     def __init__(self, event: "MessageEvent"):
         self.event = event
         self.side: Side = Side.LEFT if event.user.id == event.self_id else Side.RIGHT
-        super().__init__(classes="left" if self.side == Side.LEFT else "right")
+        super().__init__(
+            classes="left -hidden" if self.side == Side.LEFT else "right -hidden"
+        )
 
     def compose(self):
         if self.side == Side.LEFT:
@@ -64,6 +74,9 @@ class Message(Widget):
             yield MessageInfo(self.event.user.nickname, self.event.message, self.side)
             yield MessageAvatar(self.event.user)
 
+    def on_show(self):
+        self.remove_class("-hidden")
+
 
 class MessageAvatar(Widget):
     DEFAULT_CSS = """
@@ -71,7 +84,7 @@ class MessageAvatar(Widget):
         layout: horizontal;
         content-align: center middle;
         text-align: center;
-        height: 3;
+        height: 1;
         width: 3;
     }
     """
@@ -98,6 +111,7 @@ class MessageInfo(Widget):
         height: 1;
         width: 100%;
         overflow: hidden;
+        margin: 0 1;
     }
     MessageInfo.left > Static {
         text-align: left;
