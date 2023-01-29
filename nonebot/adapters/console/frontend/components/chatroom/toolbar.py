@@ -8,7 +8,6 @@ from ...router import RouteChange
 from ..general.action import Action
 
 if TYPE_CHECKING:
-    from ...app import Frontend
     from .history import ChatHistory
     from ...views.horizontal import HorizontalView
 
@@ -43,13 +42,11 @@ class Toolbar(Widget):
     }
     """
 
-    title: Reactive[str] = Reactive("Bot")
-
     def __init__(self):
         super().__init__()
         self.exit_button = Action("❌", id="exit", classes="left")
         self.clear_button = Action("🗑️", id="clear", classes="left ml")
-        self.center_title = Static(self.title, classes="center")
+        self.center_title = Static("Chat", classes="center")
         self.settings_button = Action("⚙️", id="settings", classes="right mr")
         self.log_button = Action("📝", id="log", classes="right")
 
@@ -61,12 +58,6 @@ class Toolbar(Widget):
 
         yield self.settings_button
         yield self.log_button
-
-    def on_mount(self):
-        self.title = cast("Frontend", self.app).adapter.bot.info.nickname
-
-    def watch_title(self, title: str):
-        self.center_title.update(title)
 
     async def on_action_pressed(self, event: Action.Pressed):
         event.stop()

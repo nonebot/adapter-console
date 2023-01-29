@@ -20,7 +20,7 @@ class Action(Static, can_focus=True):
         dock: right;
     }
     Action:focus, Action:hover {
-        color: $action-active-color;
+        text-style: reverse;
     }
     """
 

@@ -1,11 +1,11 @@
 from enum import Enum
 from datetime import datetime
 
-from rich.panel import Panel
 from textual.widget import Widget
 from textual.widgets import Static
 from rich.console import RenderableType
 
+from nonebot.adapters.console.utils import truncate
 from nonebot.adapters.console import User, MessageEvent
 
 
@@ -58,21 +58,21 @@ class Message(Widget):
 
     def compose(self):
         if self.side == Side.LEFT:
-            yield Avatar(self.event.user)
-            yield Bubble(self.event.message, self.side)
+            yield MessageAvatar(self.event.user)
+            yield MessageInfo(self.event.user.nickname, self.event.message, self.side)
         else:
-            yield Bubble(self.event.message, self.side)
-            yield Avatar(self.event.user)
+            yield MessageInfo(self.event.user.nickname, self.event.message, self.side)
+            yield MessageAvatar(self.event.user)
 
 
-class Avatar(Widget):
+class MessageAvatar(Widget):
     DEFAULT_CSS = """
-    Avatar {
+    MessageAvatar {
         layout: horizontal;
-        height: auto;
-        width: auto;
-        min-height: 1;
-        min-width: 3;
+        content-align: center middle;
+        text-align: center;
+        height: 3;
+        width: 3;
     }
     """
 
@@ -84,9 +84,64 @@ class Avatar(Widget):
         return self.user.avatar
 
 
+class MessageInfo(Widget):
+    DEFAULT_CSS = """
+    $message-max-width: 65%;
+
+    MessageInfo {
+        layout: vertical;
+        height: auto;
+        width: 100%;
+        max-width: $message-max-width;
+    }
+    MessageInfo > Static {
+        height: 1;
+        width: 100%;
+        overflow: hidden;
+    }
+    MessageInfo.left > Static {
+        text-align: left;
+    }
+    MessageInfo.right > Static {
+        text-align: right;
+    }
+    """
+
+    def __init__(self, nickname: str, renderable: RenderableType, side: Side):
+        super().__init__(classes="left" if side == Side.LEFT else "right")
+        self.nickname = truncate(nickname, 20)
+        self.bubble = BubbleWrapper(renderable, side)
+
+    def compose(self):
+        yield Static(self.nickname)
+        yield self.bubble
+
+
+class BubbleWrapper(Widget):
+    DEFAULT_CSS = """
+    BubbleWrapper {
+        height: auto;
+        width: 100%;
+        align-vertical: top;
+    }
+    BubbleWrapper.left {
+        align-horizontal: left;
+    }
+    BubbleWrapper.right {
+        align-horizontal: right;
+    }
+    """
+
+    def __init__(self, renderable: RenderableType, side: Side):
+        super().__init__(classes="left" if side == Side.LEFT else "right")
+        self.renderable = renderable
+
+    def compose(self):
+        yield Bubble(self.renderable)
+
+
 class Bubble(Widget):
     DEFAULT_CSS = """
-    $bubble-max-width: 65%;
     $bubble-border-type: round;
     $bubble-border-color: rgba(170, 170, 170, 0.7);
     $bubble-border: $bubble-border-type $bubble-border-color;
@@ -95,16 +150,15 @@ class Bubble(Widget):
         height: auto;
         width: auto;
         min-height: 1;
-        max-width: $bubble-max-width;
+        max-width: 100%;
         padding: 0 1;
         border: $bubble-border;
     }
     """
 
-    def __init__(self, renderable: RenderableType, side: Side):
+    def __init__(self, renderable: RenderableType):
         super().__init__()
         self.renderable = renderable
-        self.side = side
 
     def render(self):
         return self.renderable
