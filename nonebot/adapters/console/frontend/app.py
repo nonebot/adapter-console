@@ -20,9 +20,10 @@ from .views.horizontal import HorizontalView
 
 class Frontend(App):
     BINDINGS = [
+        Binding("ctrl+q", "quit", "Quit", show=False, priority=True),
         Binding("ctrl+d", "toggle_dark", "Toggle dark mode"),
         Binding("ctrl+s", "screenshot", "Save a screenshot"),
-        Binding("ctrl+l", "focus_input", "Focus input"),
+        Binding("ctrl+underscore", "focus_input", "Focus input", key_display="ctrl+/"),
     ]
 
     ROUTES = {"main": lambda: HorizontalView(), "log": lambda: LogView()}
