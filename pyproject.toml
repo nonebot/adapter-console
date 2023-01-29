@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "nonebot-adapter-console"
-version = "0.2.2"
+version = "0.3.0"
 description = "console adapter for nonebot2"
-authors = ["MelodyKnit <yanximelody@gmail.com>"]
+authors = ["MelodyKnit <yanximelody@gmail.com>", "yanyongyu <yyy@nonebot.dev>"]
 readme = "README.md"
 license = "MIT"
 packages = [
@@ -10,7 +10,7 @@ packages = [
 ] 
 
 [tool.poetry.dependencies]
-python = "^3.8.0"
+python = "^3.8"
 textual = "^0.10.1"
 nonebot2 = "^2.0.0-beta.1"
 
