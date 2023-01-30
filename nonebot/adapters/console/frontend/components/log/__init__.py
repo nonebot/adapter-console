@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Iterable, cast
+import asyncio
+from typing import TYPE_CHECKING, Tuple, Iterable, cast
 
 from textual.widget import Widget
 from textual.events import Unmount
@@ -7,7 +8,7 @@ from rich.console import RenderableType
 
 if TYPE_CHECKING:
     from ...app import Frontend
-    from ...storage import Storage
+    from ...storage import Storage, StateChange
 
 
 MAX_LINES = 1000
@@ -39,10 +40,13 @@ class LogPanel(Widget):
 
     def on_mount(self):
         self.on_log(self.storage.log_history)
-        self.storage.add_log_watcher(self.on_log)
+        self.storage.add_log_watcher(self)
 
     def on_unmount(self, event: Unmount):
-        self.storage.remove_log_watcher(self.on_log)
+        self.storage.remove_log_watcher(self)
+
+    def on_state_change(self, event: "StateChange[Tuple[RenderableType, ...]]") -> None:
+        self.on_log(event.data)
 
     def on_log(self, logs: Iterable[RenderableType]) -> None:
         for log in logs:

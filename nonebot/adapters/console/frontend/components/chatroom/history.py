@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import TYPE_CHECKING, Iterable, Optional, cast
+from typing import TYPE_CHECKING, Tuple, Iterable, Optional, cast
 
 from textual.widget import Widget
 
@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from nonebot.adapters.console import MessageEvent
 
     from ...app import Frontend
-    from ...storage import Storage
+    from ...storage import Storage, StateChange
 
 
 class ChatHistory(Widget):
@@ -32,10 +32,10 @@ class ChatHistory(Widget):
 
     def on_mount(self):
         self.on_new_message(self.storage.chat_history)
-        self.storage.add_chat_watcher(self.on_new_message)
+        self.storage.add_chat_watcher(self)
 
     def on_unmount(self):
-        self.storage.remove_chat_watcher(self.on_new_message)
+        self.storage.remove_chat_watcher(self)
 
     def action_new_message(self, message: "MessageEvent"):
         if not self.last_msg or message.time - self.last_msg.time > timedelta(
@@ -44,6 +44,9 @@ class ChatHistory(Widget):
             self.mount(Timer(message.time))
         self.mount(Message(message))
         self.last_msg = message
+
+    def on_state_change(self, event: "StateChange[Tuple[MessageEvent, ...]]"):
+        self.on_new_message(event.data)
 
     def on_new_message(self, messages: Iterable["MessageEvent"]):
         for message in messages:

@@ -1,12 +1,13 @@
-from typing import IO, List
+from typing import TYPE_CHECKING, List
 
 from rich.text import Text
 
-from .storage import Storage
+if TYPE_CHECKING:
+    from .storage import Storage
 
 
 class FakeIO:
-    def __init__(self, storage: Storage) -> None:
+    def __init__(self, storage: "Storage") -> None:
         self.storage = storage
         self._buffer: List[str] = []
 
