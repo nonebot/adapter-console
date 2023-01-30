@@ -1,13 +1,12 @@
-from textual.widget import Widget
 from textual.widgets import Header as TextualHeader
 
 
-class Header(Widget):
+class Header(TextualHeader):
     DEFAULT_CSS = """
     Header > HeaderIcon {
         color: #ea5252;
     }
     """
 
-    def compose(self):
-        yield TextualHeader(True)
+    def __init__(self):
+        super().__init__(show_clock=True)
