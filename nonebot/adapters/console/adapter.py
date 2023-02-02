@@ -61,5 +61,5 @@ class Adapter(BaseAdapter):
         asyncio.create_task(self.bot.handle_event(event))
 
     @overrides(BaseAdapter)
-    async def _call_api(self, bot: Bot, api: str, **data: Any) -> Any:
+    async def _call_api(self, bot: Bot, api: str, **data: Any) -> None:
         await asyncio.gather(*(client(bot, api, data) for client in self.clients))

@@ -32,7 +32,10 @@ def _check_nickname(bot: "Bot", event: MessageEvent) -> None:
 class Bot(BaseBot):
     if TYPE_CHECKING:
 
-        async def send_msg(self, user_id: str, message: Message, **kwargs: Any) -> Any:
+        async def send_msg(self, user_id: str, message: Message, **kwargs: Any) -> None:
+            ...
+
+        async def bell(self) -> None:
             ...
 
     @overrides(BaseBot)

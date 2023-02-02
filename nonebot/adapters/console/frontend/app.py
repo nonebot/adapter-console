@@ -104,6 +104,8 @@ class Frontend(App):
                     user=bot.info,
                 )
             )
+        elif api == "bell":
+            await self.action("bell")
 
     def action_focus_input(self):
         with contextlib.suppress(Exception):
