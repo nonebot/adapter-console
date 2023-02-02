@@ -1,6 +1,7 @@
 from typing import Type, Union, Literal, Iterable, Optional, TypedDict
 
 from rich.style import Style
+from rich.segment import Segment
 from rich.emoji import EmojiVariant
 from nonebot.typing import overrides
 from rich.text import Text as RichText
@@ -177,6 +178,7 @@ class Markup(MessageSegment):
             style=self.data["style"],
             emoji=self.data["emoji"],
             emoji_variant=self.data["emoji_variant"],
+            end="",
         )
 
     def __str__(self) -> str:
@@ -263,6 +265,8 @@ class Message(BaseMessage[MessageSegment]):
         self, console: "Console", options: "ConsoleOptions"
     ) -> "RenderResult":
         yield from self
+        if self and not isinstance(self[-1], Markdown):
+            yield Segment("\n")
 
     def __rich_measure__(
         self, console: "Console", options: "ConsoleOptions"
