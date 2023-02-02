@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot-adapter-console"
-version = "0.3.1"
+version = "0.3.2"
 description = "console adapter for nonebot2"
 authors = ["MelodyKnit <yanximelody@gmail.com>", "yanyongyu <yyy@nonebot.dev>"]
 readme = "README.md"
