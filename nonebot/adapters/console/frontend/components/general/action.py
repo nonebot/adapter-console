@@ -36,7 +36,7 @@ class Action(Static, can_focus=True):
 
     def on_click(self, event: Click):
         event.stop()
-        self.emit_no_wait(Action.Pressed(self))
+        self.post_message_no_wait(Action.Pressed(self))
 
     def action_submit(self):
-        self.emit_no_wait(Action.Pressed(self))
+        self.post_message_no_wait(Action.Pressed(self))
