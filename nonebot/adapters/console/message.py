@@ -213,15 +213,6 @@ class Markdown(MessageSegment):
     def rich(self) -> RichMarkdown:
         return RichMarkdown(**self.data)
 
-    def __str__(self) -> str:
-        return str(
-            RichText.from_markup(
-                self.data["markup"],
-                style=self.data["style"],
-                end="",
-            )
-        )
-
     def __rich_console__(
         self, console: "Console", options: "ConsoleOptions"
     ) -> "RenderResult":
