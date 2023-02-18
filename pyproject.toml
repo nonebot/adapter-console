@@ -7,11 +7,11 @@ readme = "README.md"
 license = "MIT"
 packages = [
   { include = "nonebot" }
-] 
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-textual = "^0.10.1"
+textual = "^0.11.0"
 nonebot2 = "^2.0.0-beta.1"
 
 [tool.poetry.group.dev.dependencies]

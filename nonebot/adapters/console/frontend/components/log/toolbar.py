@@ -43,6 +43,6 @@ class Toolbar(Widget):
     async def on_action_pressed(self, event: Action.Pressed):
         event.stop()
         if event.action == self.back_button:
-            self.emit_no_wait(RouteChange(self, "main"))
+            self.post_message_no_wait(RouteChange(self, "main"))
         elif event.action == self.settings_button:
             ...

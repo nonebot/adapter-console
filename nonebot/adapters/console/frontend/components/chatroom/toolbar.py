@@ -73,4 +73,4 @@ class Toolbar(Widget):
             if view.can_show_log:
                 view.action_toggle_log_panel()
             else:
-                self.emit_no_wait(RouteChange(self, "log"))
+                self.post_message_no_wait(RouteChange(self, "log"))
