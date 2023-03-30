@@ -1,13 +1,13 @@
 from typing import Dict, Callable, Optional
 
 from textual.widget import Widget
+from textual.message import Message
 from textual.reactive import Reactive
-from textual.message import Message, MessageTarget
 
 
 class RouteChange(Message, bubble=True):
-    def __init__(self, sender: MessageTarget, route: str):
-        super().__init__(sender)
+    def __init__(self, route: str):
+        super().__init__()
         self.route = route
 
 
@@ -41,6 +41,6 @@ class RouterView(Widget):
     def action_to(self, route: str):
         self.current_route = route
 
-    def on_route_change(self, event: RouteChange):
+    async def on_route_change(self, event: RouteChange):
         event.stop()
-        self.action_to(event.route)
+        await self.run_action(f"to({event.route})")

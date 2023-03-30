@@ -2,8 +2,8 @@ from dataclasses import field, dataclass
 from typing import List, Generic, TypeVar
 
 from textual.widget import Widget
+from textual.message import Message
 from rich.console import RenderableType
-from textual.message import Message, MessageTarget
 
 from nonebot.adapters.console import User, MessageEvent
 
@@ -15,8 +15,8 @@ T = TypeVar("T")
 
 
 class StateChange(Message, Generic[T], bubble=False):
-    def __init__(self, target: MessageTarget, data: T) -> None:
-        super().__init__(target)
+    def __init__(self, data: T) -> None:
+        super().__init__()
         self.data = data
 
 
@@ -47,7 +47,7 @@ class Storage:
 
     def emit_log_watcher(self, *logs: RenderableType) -> None:
         for watcher in self.log_watchers:
-            watcher.post_message_no_wait(StateChange(watcher, logs))
+            watcher.post_message(StateChange(logs))
 
     def write_chat(self, *messages: "MessageEvent") -> None:
         self.chat_history.extend(messages)
@@ -63,4 +63,4 @@ class Storage:
 
     def emit_chat_watcher(self, *messages: "MessageEvent") -> None:
         for watcher in self.chat_watchers:
-            watcher.post_message_no_wait(StateChange(watcher, messages))
+            watcher.post_message(StateChange(messages))

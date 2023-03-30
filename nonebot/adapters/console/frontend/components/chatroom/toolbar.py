@@ -2,7 +2,6 @@ from typing import TYPE_CHECKING, cast
 
 from textual.widget import Widget
 from textual.widgets import Static
-from textual.reactive import Reactive
 
 from ...router import RouteChange
 from ..general.action import Action
@@ -73,4 +72,4 @@ class Toolbar(Widget):
             if view.can_show_log:
                 view.action_toggle_log_panel()
             else:
-                self.post_message_no_wait(RouteChange(self, "log"))
+                self.post_message(RouteChange("log"))

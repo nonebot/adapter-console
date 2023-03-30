@@ -1,6 +1,5 @@
 from textual.widget import Widget
 from textual.widgets import Static
-from textual.reactive import Reactive
 
 from ...router import RouteChange
 from ..general.action import Action
@@ -43,6 +42,6 @@ class Toolbar(Widget):
     async def on_action_pressed(self, event: Action.Pressed):
         event.stop()
         if event.action == self.back_button:
-            self.post_message_no_wait(RouteChange(self, "main"))
+            self.post_message(RouteChange("main"))
         elif event.action == self.settings_button:
             ...

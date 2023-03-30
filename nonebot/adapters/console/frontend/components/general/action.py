@@ -27,16 +27,17 @@ class Action(Static, can_focus=True):
     BINDINGS = [Binding("enter", "submit", "Perform action", priority=True)]
 
     class Pressed(Message):
-        def __init__(self, sender: MessageTarget) -> None:
-            super().__init__(sender)
+        def __init__(self, target: "Action") -> None:
+            super().__init__()
+            self.target = target
 
         @property
         def action(self) -> "Action":
-            return cast(Action, self.sender)
+            return self.target
 
     def on_click(self, event: Click):
         event.stop()
-        self.post_message_no_wait(Action.Pressed(self))
+        self.post_message(Action.Pressed(self))
 
     def action_submit(self):
-        self.post_message_no_wait(Action.Pressed(self))
+        self.post_message(Action.Pressed(self))
