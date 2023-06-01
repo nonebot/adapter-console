@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://v2.nonebot.dev/"><img src="https://raw.githubusercontent.com/nonebot/adapter-console/master/assets/logo.png" width="200" alt="nonebot-adapter-console"></a>
+  <a href="https://nonebot.dev/"><img src="https://raw.githubusercontent.com/nonebot/adapter-console/master/assets/logo.png" width="200" alt="nonebot-adapter-console"></a>
 </p>
 
 <div align="center">
