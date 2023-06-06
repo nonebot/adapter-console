@@ -1,5 +1,3 @@
-from typing import cast
-
 from textual.events import Click
 from textual.widgets import Static
 from textual.binding import Binding
