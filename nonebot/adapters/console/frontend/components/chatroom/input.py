@@ -51,7 +51,7 @@ class InputBox(Widget):
     async def on_input_submitted(self, event: Input.Submitted):
         event.stop()
         self.input.value = ""
-        self.app.action_post_message(event.value)
+        await self.app.action_post_message(event.value)
 
     def action_reset_focus(self):
         self.input.reset_focus()
