@@ -43,4 +43,4 @@ class RouterView(Widget):
 
     async def on_route_change(self, event: RouteChange):
         event.stop()
-        await self.run_action(f"to({event.route})")
+        await self.run_action(f"to('{event.route}')")
