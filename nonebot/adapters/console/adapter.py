@@ -2,7 +2,8 @@ import sys
 import asyncio
 from typing import Any, Dict, List, Callable, Optional, Awaitable
 
-from nonechat import Frontend
+from textual.color import Color
+from nonechat import Frontend, ConsoleSetting
 from nonebot.drivers import Driver
 from nonebot.typing import overrides
 
@@ -40,7 +41,16 @@ class Adapter(BaseAdapter):
             self.driver.on_shutdown(self._shutdown)
 
     async def _start(self) -> None:
-        self._frontend = Frontend(AdapterConsoleBackend)
+        self._frontend = Frontend(
+            AdapterConsoleBackend,
+            ConsoleSetting(
+                title="Nonebot",
+                sub_title="welcome to Console",
+                toolbar_exit="❌",
+                toolbar_back="⬅",
+                icon_color=Color.parse("#EA5252"),
+            )
+        )
         self._frontend.backend.set_adapter(self)
         self._task = asyncio.create_task(self._frontend.run_async())
         self.bot_connect(self.bot)
@@ -57,4 +67,4 @@ class Adapter(BaseAdapter):
 
     @overrides(BaseAdapter)
     async def _call_api(self, bot: Bot, api: str, **data: Any) -> None:
-        await self._frontend.call(api, **data)
+        await self._frontend.call(api, data)

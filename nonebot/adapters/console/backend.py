@@ -1,6 +1,6 @@
 import sys
 import contextlib
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from typing import TYPE_CHECKING, Optional
 
 from nonechat import Backend
@@ -21,6 +21,10 @@ if TYPE_CHECKING:
 class AdapterConsoleBackend(Backend):
     def __init__(self, frontend: "Frontend"):
         super().__init__(frontend)
+        self.frontend.storage.current_user = replace(
+            self.frontend.storage.current_user,
+            id="User"
+        )
         self._stdout = sys.stdout
         self._logger_id: Optional[int] = None
         self._should_restore_logger: bool = False
@@ -66,9 +70,9 @@ class AdapterConsoleBackend(Backend):
             message = Message()
             for elem in event.message:
                 if isinstance(elem, Text):
-                    message += MessageSegment(type="text", data={"text": elem.text})
+                    message += MessageSegment.text(elem.text)
                 elif isinstance(elem, Emoji):
-                    message += MessageSegment(type="emoji", data={"name": elem.name})
+                    message += MessageSegment.emoji(elem.name)
                 else:
                     message += MessageSegment(
                         type=elem.__class__.__name__.lower(), data=asdict(elem)  # noqa

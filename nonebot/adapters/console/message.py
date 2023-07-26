@@ -35,6 +35,8 @@ class MessageSegment(BaseMessageSegment["Message"]):
 
     @overrides(BaseMessageSegment)
     def __str__(self) -> str:
+        if self.type == "text":
+            return self.data["text"]
         params = ", ".join(
             [f"{k}={truncate(str(v))}" for k, v in self.data.items() if v is not None]
         )
