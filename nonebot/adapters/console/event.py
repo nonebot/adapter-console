@@ -1,28 +1,13 @@
 from datetime import datetime
 from typing import List, Literal
 
-from pydantic import BaseModel
+from nonechat.info import User
 from nonebot.typing import overrides
 from nonebot.utils import escape_tag
 
 from nonebot.adapters import Event as BaseEvent
 
 from .message import Message
-
-
-class User(BaseModel, frozen=True):
-    """用户"""
-
-    id: str
-    avatar: str = "👤"
-    nickname: str = "User"
-
-
-class Robot(User, frozen=True):
-    """机器人"""
-
-    avatar: str = "🤖"
-    nickname: str = "Bot"
 
 
 class Event(BaseEvent):
@@ -97,4 +82,4 @@ class MessageEvent(Event):
         return f"Message from {self.user.nickname} {''.join(msg_string)!r}"
 
 
-__all__ = ["User", "Robot", "Event", "MessageEvent"]
+__all__ = ["Event", "MessageEvent"]

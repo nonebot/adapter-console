@@ -3,13 +3,12 @@ from typing import TYPE_CHECKING, Any, Union
 
 from nonebot.typing import overrides
 from nonebot.message import handle_event
-
-from nonebot.adapters import Adapter
+from nonechat.message import ConsoleMessage, Text, Emoji, Markdown, Markup
 from nonebot.adapters import Bot as BaseBot
 
 from .utils import log
+from .event import Event, MessageEvent
 from .message import Message, MessageSegment
-from .event import Event, Robot, MessageEvent
 
 
 def _check_nickname(bot: "Bot", event: MessageEvent) -> None:
@@ -32,18 +31,8 @@ def _check_nickname(bot: "Bot", event: MessageEvent) -> None:
 class Bot(BaseBot):
     if TYPE_CHECKING:
 
-        async def send_msg(
-            self, *, user_id: str, message: Message, **kwargs: Any
-        ) -> None:
-            ...
-
         async def bell(self) -> None:
             ...
-
-    @overrides(BaseBot)
-    def __init__(self, adapter: "Adapter", self_id: str):
-        super().__init__(adapter, self_id)
-        self.info = Robot(id=self_id)
 
     @property
     def type(self) -> str:
@@ -61,6 +50,23 @@ class Bot(BaseBot):
 
         return await self.send_msg(
             user_id=event.user.nickname, message=full_message, **kwargs
+        )
+
+    async def send_msg(
+        self, *, user_id: str, message: Message, **kwargs: Any
+    ) -> None:
+        elements = []
+        for seg in message:
+            if seg.type == "text":
+                elements.append(Text(seg.data["text"]))
+            elif seg.type == "emoji":
+                elements.append(Emoji(seg.data["name"]))
+            elif seg.type == "markdown":
+                elements.append(Markdown(**seg.data))
+            elif seg.type == "markup":
+                elements.append(Markup(**seg.data))
+        return await self.call_api(
+            "send_msg", user_id=user_id, message=ConsoleMessage(elements), **kwargs
         )
 
     async def handle_event(self, event: Event) -> None:
