@@ -3,9 +3,9 @@ import asyncio
 from typing import Any, Dict, List, Callable, Optional, Awaitable
 
 from textual.color import Color
-from nonechat import Frontend, ConsoleSetting
 from nonebot.drivers import Driver
 from nonebot.typing import overrides
+from nonechat import Frontend, ConsoleSetting
 
 from nonebot.adapters import Adapter as BaseAdapter
 
@@ -49,7 +49,7 @@ class Adapter(BaseAdapter):
                 toolbar_exit="❌",
                 toolbar_back="⬅",
                 icon_color=Color.parse("#EA5252"),
-            )
+            ),
         )
         self._frontend.backend.set_adapter(self)
         self._task = asyncio.create_task(self._frontend.run_async())

@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING, Optional
 from nonechat import Backend
 from nonechat.info import Robot
 from nonechat.app import Frontend
+from nonechat.message import Text, Emoji
 from nonechat.info import Event as ConsoleEvent
-from nonechat.message import Emoji, Text
 from nonechat.info import MessageEvent as ConsoleMessageEvent
 from nonebot.log import logger, logger_id, default_filter, default_format
 
@@ -22,8 +22,7 @@ class AdapterConsoleBackend(Backend):
     def __init__(self, frontend: "Frontend"):
         super().__init__(frontend)
         self.frontend.storage.current_user = replace(
-            self.frontend.storage.current_user,
-            id="User"
+            self.frontend.storage.current_user, id="User"
         )
         self._stdout = sys.stdout
         self._logger_id: Optional[int] = None

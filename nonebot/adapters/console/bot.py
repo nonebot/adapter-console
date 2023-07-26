@@ -3,7 +3,8 @@ from typing import TYPE_CHECKING, Any, Union
 
 from nonebot.typing import overrides
 from nonebot.message import handle_event
-from nonechat.message import ConsoleMessage, Text, Emoji, Markdown, Markup
+from nonechat.message import Text, Emoji, Markup, Markdown, ConsoleMessage
+
 from nonebot.adapters import Bot as BaseBot
 
 from .utils import log
@@ -52,9 +53,7 @@ class Bot(BaseBot):
             user_id=event.user.nickname, message=full_message, **kwargs
         )
 
-    async def send_msg(
-        self, *, user_id: str, message: Message, **kwargs: Any
-    ) -> None:
+    async def send_msg(self, *, user_id: str, message: Message, **kwargs: Any) -> None:
         elements = []
         for seg in message:
             if seg.type == "text":
