@@ -1,8 +1,8 @@
+from typing_extensions import Self, override
 from typing import Type, Union, Iterable, Optional
 
 from rich.style import Style
 from rich.emoji import EmojiVariant
-from nonebot.typing import overrides
 from rich.console import JustifyMethod
 
 from nonebot.adapters import Message as BaseMessage
@@ -13,11 +13,11 @@ from .utils import truncate
 
 class MessageSegment(BaseMessageSegment["Message"]):
     @classmethod
-    @overrides(BaseMessageSegment)
+    @override
     def get_message_class(cls) -> Type["Message"]:
         return Message
 
-    @overrides(BaseMessageSegment)
+    @override
     def __add__(
         self, other: Union[str, "MessageSegment", Iterable["MessageSegment"]]
     ) -> "Message":
@@ -25,7 +25,7 @@ class MessageSegment(BaseMessageSegment["Message"]):
             MessageSegment.text(other) if isinstance(other, str) else other
         )
 
-    @overrides(BaseMessageSegment)
+    @override
     def __radd__(
         self, other: Union[str, "MessageSegment", Iterable["MessageSegment"]]
     ) -> "Message":
@@ -33,7 +33,7 @@ class MessageSegment(BaseMessageSegment["Message"]):
             MessageSegment.text(other) if isinstance(other, str) else Message(other)
         ) + self
 
-    @overrides(BaseMessageSegment)
+    @override
     def __str__(self) -> str:
         if self.type == "text":
             return self.data["text"]
@@ -42,7 +42,7 @@ class MessageSegment(BaseMessageSegment["Message"]):
         )
         return f"[{self.type}{':' if params else ''}{params}]"
 
-    @overrides(BaseMessageSegment)
+    @override
     def is_text(self) -> bool:
         return self.type == "text"
 
@@ -99,35 +99,35 @@ class Message(BaseMessage[MessageSegment]):
     """Console 消息"""
 
     @classmethod
-    @overrides(BaseMessage)
+    @override
     def get_segment_class(cls) -> Type[MessageSegment]:
         return MessageSegment
 
-    @overrides(BaseMessage)
+    @override
     def __add__(
         self, other: Union[str, MessageSegment, Iterable[MessageSegment]]
-    ) -> "Message":
+    ) -> Self:
         return super().__add__(
             MessageSegment.text(other) if isinstance(other, str) else other
         )
 
-    @overrides(BaseMessage)
+    @override
     def __radd__(
         self, other: Union[str, MessageSegment, Iterable[MessageSegment]]
-    ) -> "Message":
+    ) -> Self:
         return super().__radd__(
             MessageSegment.text(other) if isinstance(other, str) else other
         )
 
-    @overrides(BaseMessage)
+    @override
     def __iadd__(
         self, other: Union[str, MessageSegment, Iterable[MessageSegment]]
-    ) -> "Message":
+    ) -> Self:
         return super().__iadd__(
             MessageSegment.text(other) if isinstance(other, str) else other
         )
 
     @staticmethod
-    @overrides(BaseMessage)
+    @override
     def _construct(msg: str) -> Iterable[MessageSegment]:
         yield MessageSegment.text(msg)
