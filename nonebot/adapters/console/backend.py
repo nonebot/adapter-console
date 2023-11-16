@@ -46,7 +46,8 @@ class AdapterConsoleBackend(Backend):
         )
 
     def on_console_mount(self):
-        pass
+        self._adapter.bot_connect(self._adapter.bot)
+        logger.success("Console mounted.")
 
     def on_console_unmount(self):
         if self._logger_id is not None:
@@ -61,7 +62,8 @@ class AdapterConsoleBackend(Backend):
                 format=default_format,
             )
             self._should_restore_logger = False
-        logger.success("Console exit.")
+        self._adapter.bot_disconnect(self._adapter.bot)
+        logger.success("Console unmounted.")
         logger.warning("Press Ctrl-C for Application exit")
 
     async def post_event(self, event: ConsoleEvent):
