@@ -53,10 +53,8 @@ class Adapter(BaseAdapter):
         )
         self._frontend.backend.set_adapter(self)
         self._task = asyncio.create_task(self._frontend.run_async())
-        self.bot_connect(self.bot)
 
     async def _shutdown(self) -> None:
-        self.bot_disconnect(self.bot)
         if self._frontend:
             self._frontend.exit()
         if self._task:
