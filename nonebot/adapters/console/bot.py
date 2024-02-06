@@ -32,8 +32,7 @@ def _check_nickname(bot: "Bot", event: MessageEvent) -> None:
 class Bot(BaseBot):
     if TYPE_CHECKING:
 
-        async def bell(self) -> None:
-            ...
+        async def bell(self) -> None: ...
 
     @property
     def type(self) -> str:
