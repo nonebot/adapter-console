@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import List, Literal
+from typing_extensions import override
 
 from nonechat.info import User
-from nonebot.typing import overrides
 from nonebot.utils import escape_tag
 
 from nonebot.adapters import Event as BaseEvent
@@ -16,31 +16,31 @@ class Event(BaseEvent):
     post_type: str
     user: User
 
-    @overrides(BaseEvent)
+    @override
     def get_type(self) -> str:
         return self.post_type
 
-    @overrides(BaseEvent)
+    @override
     def get_event_name(self) -> str:
         return self.post_type
 
-    @overrides(BaseEvent)
+    @override
     def get_event_description(self) -> str:
         return str(self.dict())
 
-    @overrides(BaseEvent)
+    @override
     def get_message(self) -> Message:
         raise ValueError("Event has no message!")
 
-    @overrides(BaseEvent)
+    @override
     def get_user_id(self) -> str:
         raise ValueError("Event has no user_id!")
 
-    @overrides(BaseEvent)
+    @override
     def get_session_id(self) -> str:
         raise ValueError("Event has no session_id!")
 
-    @overrides(BaseEvent)
+    @override
     def is_tome(self) -> bool:
         """获取事件是否与机器人有关的方法。"""
         return True
@@ -50,23 +50,23 @@ class MessageEvent(Event):
     post_type: Literal["message"] = "message"
     message: Message
 
-    @overrides(Event)
+    @override
     def get_user_id(self) -> str:
         return self.user.nickname
 
-    @overrides(Event)
+    @override
     def get_message(self) -> Message:
         return self.message
 
-    @overrides(Event)
+    @override
     def get_session_id(self) -> str:
         return self.user.nickname
 
-    @overrides(Event)
+    @override
     def is_tome(self) -> bool:
         return True
 
-    @overrides(Event)
+    @override
     def get_event_description(self) -> str:
         texts: List[str] = []
         msg_string: List[str] = []

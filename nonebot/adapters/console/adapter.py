@@ -1,12 +1,13 @@
 import sys
 import asyncio
+from typing_extensions import override
 from typing import Any, Dict, List, Callable, Optional, Awaitable
 
 from textual.color import Color
 from nonebot.drivers import Driver
-from nonebot.typing import overrides
 from nonechat import Frontend, ConsoleSetting
 
+from nonebot import get_plugin_config
 from nonebot.adapters import Adapter as BaseAdapter
 
 from . import BOT_ID
@@ -17,10 +18,10 @@ from .backend import AdapterConsoleBackend
 
 
 class Adapter(BaseAdapter):
-    @overrides(BaseAdapter)
+    @override
     def __init__(self, driver: Driver, **kwargs: Any) -> None:
         super().__init__(driver, **kwargs)
-        self.console_config = Config.parse_obj(self.config)
+        self.console_config = get_plugin_config(Config)
         self.bot = Bot(self, BOT_ID)
 
         self._task: Optional[asyncio.Task] = None
@@ -31,7 +32,7 @@ class Adapter(BaseAdapter):
         self.setup()
 
     @staticmethod
-    @overrides(BaseAdapter)
+    @override
     def get_name() -> str:
         return "Console"
 
@@ -63,6 +64,6 @@ class Adapter(BaseAdapter):
     def post_event(self, event: Event) -> None:
         asyncio.create_task(self.bot.handle_event(event))
 
-    @overrides(BaseAdapter)
+    @override
     async def _call_api(self, bot: Bot, api: str, **data: Any) -> None:
         await self._frontend.call(api, data)
