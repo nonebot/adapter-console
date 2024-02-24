@@ -1,7 +1,7 @@
 import re
+from typing_extensions import override
 from typing import TYPE_CHECKING, Any, Union
 
-from nonebot.typing import overrides
 from nonebot.message import handle_event
 from nonechat.message import Text, Emoji, Markup, Markdown, ConsoleMessage
 
@@ -38,7 +38,7 @@ class Bot(BaseBot):
     def type(self) -> str:
         return "Console"
 
-    @overrides(BaseBot)
+    @override
     async def send(
         self,
         event: Event,
