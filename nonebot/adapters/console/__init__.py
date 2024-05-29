@@ -1,6 +1,7 @@
 BOT_ID = "console"
 
 from .bot import Bot as Bot
+from .event import User as User
 from .event import Event as Event
 from .adapter import Adapter as Adapter
 from .message import Message as Message
