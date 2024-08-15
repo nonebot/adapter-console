@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Literal
+from typing import Literal
 from typing_extensions import override
 
 from nonechat.info import User
@@ -68,15 +68,13 @@ class MessageEvent(Event):
 
     @override
     def get_event_description(self) -> str:
-        texts: List[str] = []
-        msg_string: List[str] = []
+        texts: list[str] = []
+        msg_string: list[str] = []
         for seg in self.message:
             if seg.is_text():
                 texts.append(str(seg))
             else:
-                msg_string.extend(
-                    (escape_tag("".join(texts)), f"<le>{escape_tag(str(seg))}</le>")
-                )
+                msg_string.extend((escape_tag("".join(texts)), f"<le>{escape_tag(str(seg))}</le>"))
                 texts.clear()
         msg_string.append(escape_tag("".join(texts)))
         return f"Message from {self.user.nickname} {''.join(msg_string)!r}"

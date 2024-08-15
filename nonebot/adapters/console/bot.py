@@ -48,9 +48,7 @@ class Bot(BaseBot):
         full_message = Message()
         full_message += message
 
-        return await self.send_msg(
-            user_id=event.user.nickname, message=full_message, **kwargs
-        )
+        return await self.send_msg(user_id=event.user.nickname, message=full_message, **kwargs)
 
     async def send_msg(self, *, user_id: str, message: Message, **kwargs: Any) -> None:
         elements = []
@@ -63,9 +61,7 @@ class Bot(BaseBot):
                 elements.append(Markdown(**seg.data))
             elif seg.type == "markup":
                 elements.append(Markup(**seg.data))
-        return await self.call_api(
-            "send_msg", user_id=user_id, message=ConsoleMessage(elements), **kwargs
-        )
+        return await self.call_api("send_msg", user_id=user_id, message=ConsoleMessage(elements), **kwargs)
 
     async def handle_event(self, event: Event) -> None:
         """处理收到的事件"""

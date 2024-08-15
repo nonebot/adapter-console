@@ -1,7 +1,8 @@
 import sys
 import asyncio
 from typing_extensions import override
-from typing import Any, Dict, List, Callable, Optional, Awaitable
+from typing import Any, Callable, Optional
+from collections.abc import Awaitable
 
 from textual.color import Color
 from nonebot.drivers import Driver
@@ -18,6 +19,8 @@ from .backend import AdapterConsoleBackend
 
 
 class Adapter(BaseAdapter):
+    _frontend: Frontend[AdapterConsoleBackend]
+
     @override
     def __init__(self, driver: Driver, **kwargs: Any) -> None:
         super().__init__(driver, **kwargs)
@@ -25,9 +28,9 @@ class Adapter(BaseAdapter):
         self.bot = Bot(self, BOT_ID)
 
         self._task: Optional[asyncio.Task] = None
-        self._frontend: Optional[Frontend[AdapterConsoleBackend]] = None
+
         self._stdout = sys.stdout
-        self.clients: List[Callable[[Bot, str, Dict[str, Any]], Awaitable[Any]]] = []
+        self.clients: list[Callable[[Bot, str, dict[str, Any]], Awaitable[Any]]] = []
 
         self.setup()
 

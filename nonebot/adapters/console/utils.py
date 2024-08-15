@@ -3,9 +3,7 @@ from nonebot.utils import logger_wrapper
 log = logger_wrapper("Console")
 
 
-def truncate(
-    s: str, length: int = 70, kill_words: bool = True, end: str = "..."
-) -> str:
+def truncate(s: str, length: int = 70, kill_words: bool = True, end: str = "...") -> str:
     if len(s) <= length:
         return s
 

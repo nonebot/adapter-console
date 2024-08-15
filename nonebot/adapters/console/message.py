@@ -1,5 +1,6 @@
 from typing_extensions import Self, override
-from typing import Type, Union, Iterable, Optional
+from typing import Union, Optional
+from collections.abc import Iterable
 
 from rich.style import Style
 from rich.emoji import EmojiVariant
@@ -14,32 +15,22 @@ from .utils import truncate
 class MessageSegment(BaseMessageSegment["Message"]):
     @classmethod
     @override
-    def get_message_class(cls) -> Type["Message"]:
+    def get_message_class(cls) -> type["Message"]:
         return Message
 
     @override
-    def __add__(
-        self, other: Union[str, "MessageSegment", Iterable["MessageSegment"]]
-    ) -> "Message":
-        return Message(self) + (
-            MessageSegment.text(other) if isinstance(other, str) else other
-        )
+    def __add__(self, other: Union[str, "MessageSegment", Iterable["MessageSegment"]]) -> "Message":
+        return Message(self) + (MessageSegment.text(other) if isinstance(other, str) else other)
 
     @override
-    def __radd__(
-        self, other: Union[str, "MessageSegment", Iterable["MessageSegment"]]
-    ) -> "Message":
-        return (
-            MessageSegment.text(other) if isinstance(other, str) else Message(other)
-        ) + self
+    def __radd__(self, other: Union[str, "MessageSegment", Iterable["MessageSegment"]]) -> "Message":
+        return (MessageSegment.text(other) if isinstance(other, str) else Message(other)) + self
 
     @override
     def __str__(self) -> str:
         if self.type == "text":
             return self.data["text"]
-        params = ", ".join(
-            [f"{k}={truncate(str(v))}" for k, v in self.data.items() if v is not None]
-        )
+        params = ", ".join([f"{k}={truncate(str(v))}" for k, v in self.data.items() if v is not None])
         return f"[{self.type}{':' if params else ''}{params}]"
 
     @override
@@ -100,32 +91,20 @@ class Message(BaseMessage[MessageSegment]):
 
     @classmethod
     @override
-    def get_segment_class(cls) -> Type[MessageSegment]:
+    def get_segment_class(cls) -> type[MessageSegment]:
         return MessageSegment
 
     @override
-    def __add__(
-        self, other: Union[str, MessageSegment, Iterable[MessageSegment]]
-    ) -> Self:
-        return super().__add__(
-            MessageSegment.text(other) if isinstance(other, str) else other
-        )
+    def __add__(self, other: Union[str, MessageSegment, Iterable[MessageSegment]]) -> Self:
+        return super().__add__(MessageSegment.text(other) if isinstance(other, str) else other)
 
     @override
-    def __radd__(
-        self, other: Union[str, MessageSegment, Iterable[MessageSegment]]
-    ) -> Self:
-        return super().__radd__(
-            MessageSegment.text(other) if isinstance(other, str) else other
-        )
+    def __radd__(self, other: Union[str, MessageSegment, Iterable[MessageSegment]]) -> Self:
+        return super().__radd__(MessageSegment.text(other) if isinstance(other, str) else other)
 
     @override
-    def __iadd__(
-        self, other: Union[str, MessageSegment, Iterable[MessageSegment]]
-    ) -> Self:
-        return super().__iadd__(
-            MessageSegment.text(other) if isinstance(other, str) else other
-        )
+    def __iadd__(self, other: Union[str, MessageSegment, Iterable[MessageSegment]]) -> Self:
+        return super().__iadd__(MessageSegment.text(other) if isinstance(other, str) else other)
 
     @staticmethod
     @override

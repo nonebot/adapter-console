@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING, Optional
 from nonechat import Backend
 from nonechat.info import Robot
 from nonechat.app import Frontend
-from nonechat.message import Text, Emoji
 from nonechat.info import Event as ConsoleEvent
+from nonechat.message import Text, Emoji, Markup, Markdown
 from nonechat.info import MessageEvent as ConsoleMessageEvent
 from nonebot.log import logger, logger_id, default_filter, default_format
 
@@ -19,15 +19,14 @@ if TYPE_CHECKING:
 
 
 class AdapterConsoleBackend(Backend):
+    _adapter: "Adapter"
+
     def __init__(self, frontend: "Frontend"):
         super().__init__(frontend)
-        self.frontend.storage.current_user = replace(
-            self.frontend.storage.current_user, id="User"
-        )
+        self.frontend.storage.current_user = replace(self.frontend.storage.current_user, id="User")
         self._stdout = sys.stdout
         self._logger_id: Optional[int] = None
         self._should_restore_logger: bool = False
-        self._adapter: Optional["Adapter"] = None  # noqa: UP037
 
     def set_adapter(self, adapter: "Adapter"):
         self._adapter = adapter
@@ -75,9 +74,9 @@ class AdapterConsoleBackend(Backend):
                 elif isinstance(elem, Emoji):
                     message += MessageSegment.emoji(elem.name)
                 else:
-                    message += MessageSegment(
-                        type=elem.__class__.__name__.lower(), data=asdict(elem)  # noqa
-                    )
+                    if TYPE_CHECKING:
+                        assert isinstance(elem, (Markdown, Markup))
+                    message += MessageSegment(type=elem.__class__.__name__.lower(), data=asdict(elem))  # noqa
             self._adapter.post_event(
                 MessageEvent(
                     time=event.time,
