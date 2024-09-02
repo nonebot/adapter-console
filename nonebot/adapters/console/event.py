@@ -1,5 +1,5 @@
-from datetime import datetime
 from typing import Literal
+from datetime import datetime
 from typing_extensions import override
 
 from nonechat.info import User
