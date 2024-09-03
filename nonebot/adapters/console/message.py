@@ -1,6 +1,6 @@
-from typing_extensions import Self, override
 from typing import Union, Optional
 from collections.abc import Iterable
+from typing_extensions import Self, override
 
 from rich.style import Style
 from rich.emoji import EmojiVariant

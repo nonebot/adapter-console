@@ -1,8 +1,8 @@
 import sys
 import asyncio
+from collections.abc import Awaitable
 from typing_extensions import override
 from typing import Any, Callable, Optional
-from collections.abc import Awaitable
 
 from textual.color import Color
 from nonebot.drivers import Driver
