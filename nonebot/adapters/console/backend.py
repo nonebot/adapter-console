@@ -82,7 +82,7 @@ class AdapterConsoleBackend(Backend):
                     post_type="message",
                     message=message,
                     channel=event.channel,
-                    original_message=deepcopy(message)
+                    original_message=deepcopy(message),
                 )
             )
         else:

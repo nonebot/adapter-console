@@ -5,11 +5,10 @@ from typing_extensions import Self, override
 from rich.style import Style
 from rich.emoji import EmojiVariant
 from rich.console import JustifyMethod
+from nonechat import Text, Emoji, Markup, Markdown, ConsoleMessage
 
 from nonebot.adapters import Message as BaseMessage
 from nonebot.adapters import MessageSegment as BaseMessageSegment
-
-from nonechat import ConsoleMessage, Text, Emoji, Markup, Markdown
 
 from .utils import truncate
 

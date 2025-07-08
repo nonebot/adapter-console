@@ -1,14 +1,13 @@
-from copy import deepcopy
+from typing import Literal
 from datetime import datetime
-from typing import Literal, TYPE_CHECKING, Any
 from typing_extensions import override
 
-from nonechat.model import User, Channel
 from nonechat.storage import DIRECT
 from nonebot.utils import escape_tag
+from nonechat.model import User, Channel
+from nonebot.compat import model_dump, type_validate_python
 
 from nonebot.adapters import Event as BaseEvent
-from nonebot.compat import model_dump, type_validate_python, model_validator
 
 from .message import Message
 

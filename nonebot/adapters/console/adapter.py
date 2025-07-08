@@ -11,10 +11,10 @@ from nonechat import Frontend, ConsoleSetting
 from nonebot import get_plugin_config
 from nonebot.adapters import Adapter as BaseAdapter
 
-from .exception import ApiNotAvailable
 from .bot import Bot
 from .event import Event
 from .config import Config
+from .exception import ApiNotAvailable
 from .backend import AdapterConsoleBackend
 
 
@@ -50,7 +50,7 @@ class Adapter(BaseAdapter):
                 sub_title="welcome to Console",
                 toolbar_exit="❌",
                 icon_color=Color.parse("#EA5252"),
-                bot_name=self.console_config.console_bot_name
+                bot_name=self.console_config.console_bot_name,
             ),
         )
         self._frontend.backend.set_adapter(self)
@@ -79,7 +79,9 @@ class Adapter(BaseAdapter):
         elif api == "get_user":
             return next(user for user in self._frontend.storage.users if user.id == data["user_id"])
         elif api == "get_channel":
-            return next(channel for channel in self._frontend.storage.channels if channel.id == data["channel_id"])
+            return next(
+                channel for channel in self._frontend.storage.channels if channel.id == data["channel_id"]
+            )
         elif api == "get_users":
             return self._frontend.storage.users
         elif api == "get_channels":

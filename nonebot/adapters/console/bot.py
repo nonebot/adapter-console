@@ -3,7 +3,8 @@ from typing_extensions import override
 from typing import TYPE_CHECKING, Any, Union
 
 from nonebot.message import handle_event
-from nonechat.model import DIRECT, User, Channel, Robot
+from nonechat.model import DIRECT, User, Robot, Channel
+
 from nonebot.adapters import Bot as BaseBot
 
 from .utils import log
@@ -25,10 +26,14 @@ def _check_at_me(bot: "Bot", event: MessageEvent):
     if message[0].type == "text":
         if message[0].data["text"].startswith(f"@{bot.self_id}"):
             event.to_me = True
-            message[0].data["text"] = message[0].data["text"][len(f"@{bot.self_id}"):].lstrip("\xa0").lstrip()
+            message[0].data["text"] = (
+                message[0].data["text"][len(f"@{bot.self_id}") :].lstrip("\xa0").lstrip()
+            )
         elif message[0].data["text"].startswith(f"@{bot.info.nickname}"):
             event.to_me = True
-            message[0].data["text"] = message[0].data["text"][len(f"@{bot.info.nickname}") :].lstrip("\xa0").lstrip()
+            message[0].data["text"] = (
+                message[0].data["text"][len(f"@{bot.info.nickname}") :].lstrip("\xa0").lstrip()
+            )
         if not message[0].data["text"]:
             del message[0]
 
@@ -81,9 +86,7 @@ class Bot(BaseBot):
             target=event.user if event.channel == DIRECT else event.channel,
         )
 
-    async def send_private_msg(
-        self, user_id: str, message: Union[str, Message, MessageSegment]
-    ):
+    async def send_private_msg(self, user_id: str, message: Union[str, Message, MessageSegment]):
         user = await self.get_user(user_id)
         full_message = Message()
         full_message += message
@@ -93,9 +96,7 @@ class Bot(BaseBot):
             target=user,
         )
 
-    async def send_group_msg(
-        self, channel_id: str, message: Union[str, Message, MessageSegment]
-    ):
+    async def send_group_msg(self, channel_id: str, message: Union[str, Message, MessageSegment]):
         channel = await self.get_channel(channel_id)
         full_message = Message()
         full_message += message
