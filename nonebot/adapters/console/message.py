@@ -9,6 +9,8 @@ from rich.console import JustifyMethod
 from nonebot.adapters import Message as BaseMessage
 from nonebot.adapters import MessageSegment as BaseMessageSegment
 
+from nonechat import ConsoleMessage, Text, Emoji, Markup, Markdown
+
 from .utils import truncate
 
 
@@ -110,3 +112,17 @@ class Message(BaseMessage[MessageSegment]):
     @override
     def _construct(msg: str) -> Iterable[MessageSegment]:
         yield MessageSegment.text(msg)
+
+    def to_console_message(self) -> ConsoleMessage:
+        """将 Message 转换为 ConsoleMessage"""
+        elements = []
+        for seg in self:
+            if seg.type == "text":
+                elements.append(Text(seg.data["text"]))
+            elif seg.type == "emoji":
+                elements.append(Emoji(seg.data["name"]))
+            elif seg.type == "markdown":
+                elements.append(Markdown(**seg.data))
+            elif seg.type == "markup":
+                elements.append(Markup(**seg.data))
+        return ConsoleMessage(elements)

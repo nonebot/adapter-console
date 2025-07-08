@@ -1,14 +1,14 @@
 import sys
 import contextlib
+from copy import deepcopy
 from dataclasses import asdict, replace
 from typing import TYPE_CHECKING, Optional
 
 from nonechat import Backend
-from nonechat.info import Robot
 from nonechat.app import Frontend
-from nonechat.info import Event as ConsoleEvent
+from nonechat.model import Event as ConsoleEvent
 from nonechat.message import Text, Emoji, Markup, Markdown
-from nonechat.info import MessageEvent as ConsoleMessageEvent
+from nonechat.model import MessageEvent as ConsoleMessageEvent
 from nonebot.log import logger, logger_id, default_filter, default_format
 
 from .event import Event, MessageEvent
@@ -30,7 +30,6 @@ class AdapterConsoleBackend(Backend):
 
     def set_adapter(self, adapter: "Adapter"):
         self._adapter = adapter
-        self.bot = Robot(id=self._adapter.bot.self_id)
 
     def on_console_load(self):
         with contextlib.suppress(ValueError):
@@ -45,7 +44,6 @@ class AdapterConsoleBackend(Backend):
         )
 
     def on_console_mount(self):
-        self._adapter.bot_connect(self._adapter.bot)
         logger.success("Console mounted.")
 
     def on_console_unmount(self):
@@ -61,7 +59,6 @@ class AdapterConsoleBackend(Backend):
                 format=default_format,
             )
             self._should_restore_logger = False
-        self._adapter.bot_disconnect(self._adapter.bot)
         logger.success("Console unmounted.")
         logger.warning("Press Ctrl-C for Application exit")
 
@@ -84,6 +81,8 @@ class AdapterConsoleBackend(Backend):
                     user=event.user,
                     post_type="message",
                     message=message,
+                    channel=event.channel,
+                    original_message=deepcopy(message)
                 )
             )
         else:
@@ -93,5 +92,6 @@ class AdapterConsoleBackend(Backend):
                     self_id=event.self_id,
                     user=event.user,
                     post_type=event.type,
+                    channel=event.channel,
                 )
             )

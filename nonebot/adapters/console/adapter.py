@@ -11,7 +11,7 @@ from nonechat import Frontend, ConsoleSetting
 from nonebot import get_plugin_config
 from nonebot.adapters import Adapter as BaseAdapter
 
-from . import BOT_ID
+from .exception import ApiNotAvailable
 from .bot import Bot
 from .event import Event
 from .config import Config
@@ -25,8 +25,6 @@ class Adapter(BaseAdapter):
     def __init__(self, driver: Driver, **kwargs: Any) -> None:
         super().__init__(driver, **kwargs)
         self.console_config = get_plugin_config(Config)
-        self.bot = Bot(self, BOT_ID)
-
         self._task: Optional[asyncio.Task] = None
 
         self._stdout = sys.stdout
@@ -34,9 +32,9 @@ class Adapter(BaseAdapter):
 
         self.setup()
 
-    @staticmethod
+    @classmethod
     @override
-    def get_name() -> str:
+    def get_name(cls) -> str:
         return "Console"
 
     def setup(self):
@@ -51,11 +49,13 @@ class Adapter(BaseAdapter):
                 title="Nonebot",
                 sub_title="welcome to Console",
                 toolbar_exit="❌",
-                toolbar_back="⬅",
                 icon_color=Color.parse("#EA5252"),
+                bot_name=self.console_config.console_bot_name
             ),
         )
         self._frontend.backend.set_adapter(self)
+        bot = Bot(self, self._frontend.backend.bot)
+        self.bot_connect(bot)
         self._task = asyncio.create_task(self._frontend.run_async())
 
     async def _shutdown(self) -> None:
@@ -63,10 +63,26 @@ class Adapter(BaseAdapter):
             self._frontend.exit()
         if self._task:
             await self._task
+        for bot in self.bots.copy().values():
+            self.bot_disconnect(bot)
 
     def post_event(self, event: Event) -> None:
-        asyncio.create_task(self.bot.handle_event(event))
+        bot: Bot = self.bots[event.self_id]  # type: ignore
+        asyncio.create_task(bot.handle_event(event))
 
     @override
-    async def _call_api(self, bot: Bot, api: str, **data: Any) -> None:
-        await self._frontend.call(api, data)
+    async def _call_api(self, bot: Bot, api: str, **data: Any):
+        if api == "send_msg":
+            self._frontend.send_message(**data)
+        elif api == "bell":
+            await self._frontend.toggle_bell()
+        elif api == "get_user":
+            return next(user for user in self._frontend.storage.users if user.id == data["user_id"])
+        elif api == "get_channel":
+            return next(channel for channel in self._frontend.storage.channels if channel.id == data["channel_id"])
+        elif api == "get_users":
+            return self._frontend.storage.users
+        elif api == "get_channels":
+            return self._frontend.storage.channels
+        else:
+            raise ApiNotAvailable(f"API {api} is not available in Console adapter")

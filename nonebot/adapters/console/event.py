@@ -1,11 +1,14 @@
+from copy import deepcopy
 from datetime import datetime
-from typing import Literal
+from typing import Literal, TYPE_CHECKING, Any
 from typing_extensions import override
 
-from nonechat.info import User
+from nonechat.model import User, Channel
+from nonechat.storage import DIRECT
 from nonebot.utils import escape_tag
 
 from nonebot.adapters import Event as BaseEvent
+from nonebot.compat import model_dump, type_validate_python, model_validator
 
 from .message import Message
 
@@ -15,6 +18,7 @@ class Event(BaseEvent):
     self_id: str
     post_type: str
     user: User
+    channel: Channel
 
     @override
     def get_type(self) -> str:
@@ -26,7 +30,7 @@ class Event(BaseEvent):
 
     @override
     def get_event_description(self) -> str:
-        return str(self.dict())
+        return escape_tag(str(model_dump(self)))
 
     @override
     def get_message(self) -> Message:
@@ -34,11 +38,13 @@ class Event(BaseEvent):
 
     @override
     def get_user_id(self) -> str:
-        raise ValueError("Event has no user_id!")
+        return self.user.id
 
     @override
     def get_session_id(self) -> str:
-        raise ValueError("Event has no session_id!")
+        if self.channel == DIRECT:
+            return self.user.id
+        return f"{self.channel.id}_{self.user.id}"
 
     @override
     def is_tome(self) -> bool:
@@ -49,22 +55,17 @@ class Event(BaseEvent):
 class MessageEvent(Event):
     post_type: Literal["message"] = "message"
     message: Message
+    to_me: bool = False
 
-    @override
-    def get_user_id(self) -> str:
-        return self.user.nickname
+    original_message: Message
 
     @override
     def get_message(self) -> Message:
         return self.message
 
     @override
-    def get_session_id(self) -> str:
-        return self.user.nickname
-
-    @override
     def is_tome(self) -> bool:
-        return True
+        return self.to_me
 
     @override
     def get_event_description(self) -> str:
@@ -77,7 +78,24 @@ class MessageEvent(Event):
                 msg_string.extend((escape_tag("".join(texts)), f"<le>{escape_tag(str(seg))}</le>"))
                 texts.clear()
         msg_string.append(escape_tag("".join(texts)))
-        return f"Message from {self.user.nickname} {''.join(msg_string)!r}"
+        if self.channel == DIRECT:
+            return f"Message from {self.user.nickname} {''.join(msg_string)!r}"
+        return f"Message from {self.user.nickname}@{self.channel.name} {''.join(msg_string)!r}"
+
+    def convert(self):
+        if self.channel == DIRECT:
+            return type_validate_python(PrivateMessageEvent, model_dump(self))
+        return type_validate_python(PublicMessageEvent, model_dump(self))
 
 
-__all__ = ["Event", "MessageEvent"]
+class PrivateMessageEvent(MessageEvent):
+    @override
+    def is_tome(self) -> bool:
+        return True
+
+
+class PublicMessageEvent(MessageEvent):
+    pass
+
+
+__all__ = ["Event", "MessageEvent", "PrivateMessageEvent", "PublicMessageEvent"]
