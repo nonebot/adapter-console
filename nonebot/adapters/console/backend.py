@@ -1,15 +1,17 @@
-import sys
-import contextlib
 from copy import deepcopy
 from dataclasses import asdict, replace
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, cast
 
+from loguru import _colorama
 from nonechat import Backend
+from nonebot.log import logger
+from loguru._logger import Logger
 from nonechat.app import Frontend
+from loguru._handler import Handler
+from loguru._simple_sinks import StreamSink
 from nonechat.model import Event as ConsoleEvent
 from nonechat.message import Text, Emoji, Markup, Markdown
 from nonechat.model import MessageEvent as ConsoleMessageEvent
-from nonebot.log import logger, logger_id, default_filter, default_format
 
 from .event import Event, MessageEvent
 from .message import Message, MessageSegment
@@ -24,41 +26,28 @@ class AdapterConsoleBackend(Backend):
     def __init__(self, frontend: "Frontend"):
         super().__init__(frontend)
         self.frontend.storage.current_user = replace(self.frontend.storage.current_user, id="User")
-        self._stdout = sys.stdout
-        self._logger_id: Optional[int] = None
-        self._should_restore_logger: bool = False
+        self._origin_sink: Optional[StreamSink] = None
 
     def set_adapter(self, adapter: "Adapter"):
         self._adapter = adapter
 
     def on_console_load(self):
-        with contextlib.suppress(ValueError):
-            logger.remove(logger_id)
-            self._should_restore_logger = True
-        self._logger_id = logger.add(
-            self.frontend._fake_output,
-            level=0,
-            diagnose=False,
-            filter=default_filter,
-            format=default_format,
-        )
+        current_handler: Handler = list(cast(Logger, logger)._core.handlers.values())[-1]
+        if current_handler._colorize and _colorama.should_wrap(self.frontend._fake_output):
+            stream = _colorama.wrap(self.frontend._fake_output)
+        else:
+            stream = self.frontend._fake_output
+        self._origin_sink = current_handler._sink
+        current_handler._sink = StreamSink(stream)
 
     def on_console_mount(self):
         logger.success("Console mounted.")
 
     def on_console_unmount(self):
-        if self._logger_id is not None:
-            logger.remove(self._logger_id)
-            self._logger_id = None
-        if self._should_restore_logger:
-            logger.add(
-                self._stdout,
-                level=0,
-                diagnose=False,
-                filter=default_filter,
-                format=default_format,
-            )
-            self._should_restore_logger = False
+        if self._origin_sink is not None:
+            current_handler: Handler = list(cast(Logger, logger)._core.handlers.values())[-1]
+            current_handler._sink = self._origin_sink
+            self._origin_sink = None
         logger.success("Console unmounted.")
         logger.warning("Press Ctrl-C for Application exit")
 
