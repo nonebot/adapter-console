@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING, Optional, cast
 
 from loguru import _colorama
 from nonechat import Backend
-from nonebot.log import logger
 from loguru._logger import Logger
 from nonechat.app import Frontend
 from loguru._handler import Handler
+from nonebot.log import logger, logger_id
 from loguru._simple_sinks import StreamSink
 from nonechat.model import Event as ConsoleEvent
 from nonechat.message import Text, Emoji, Markup, Markdown
@@ -32,7 +32,7 @@ class AdapterConsoleBackend(Backend):
         self._adapter = adapter
 
     def on_console_load(self):
-        current_handler: Handler = list(cast(Logger, logger)._core.handlers.values())[-1]
+        current_handler: Handler = cast(Logger, logger)._core.handlers[logger_id]
         if current_handler._colorize and _colorama.should_wrap(self.frontend._fake_output):
             stream = _colorama.wrap(self.frontend._fake_output)
         else:
@@ -45,7 +45,7 @@ class AdapterConsoleBackend(Backend):
 
     def on_console_unmount(self):
         if self._origin_sink is not None:
-            current_handler: Handler = list(cast(Logger, logger)._core.handlers.values())[-1]
+            current_handler: Handler = cast(Logger, logger)._core.handlers[logger_id]
             current_handler._sink = self._origin_sink
             self._origin_sink = None
         logger.success("Console unmounted.")
