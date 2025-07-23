@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:149c9074150f2ef714b78c5b8f0ed6654b070b587d73ea1e161a68102dce463a"
+content_hash = "sha256:b7c4dfb48eaede1fae951d2d21888ca9d240df8d7ec72e0c9b16b7675d28bdf9"
 
 [[metadata.targets]]
 requires_python = "~=3.9"
@@ -418,15 +418,15 @@ files = [
 
 [[package]]
 name = "nonechat"
-version = "0.4.2"
+version = "0.5.0"
 requires_python = "<4.0,>=3.9"
 summary = "Awesome chat console using Textual"
 dependencies = [
     "textual<4.0.0,>=3.7.0",
 ]
 files = [
-    {file = "nonechat-0.4.2-py3-none-any.whl", hash = "sha256:3528af6ae4c658a6a9ec7937d4667eb87847c13bbdd39227c84bba6775238115"},
-    {file = "nonechat-0.4.2.tar.gz", hash = "sha256:a59f1fbf2aa4218a5012804a3ce6df5cc3a4cc498fdeffa2dd2209ee0b0e2d9c"},
+    {file = "nonechat-0.5.0-py3-none-any.whl", hash = "sha256:3103497ffec92a70fbc1922e9afd101b4562713fa4c70648a875c24676fccc5d"},
+    {file = "nonechat-0.5.0.tar.gz", hash = "sha256:ccd9ec0c3c81207a14d4e84964bd53418046a54d8dbcb5c9b62bda7ba3e9877a"},
 ]
 
 [[package]]

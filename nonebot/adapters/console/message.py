@@ -1,6 +1,7 @@
-from typing import Union, Optional
+from dataclasses import asdict
 from collections.abc import Iterable
 from typing_extensions import Self, override
+from typing import TYPE_CHECKING, Union, Optional
 
 from rich.style import Style
 from rich.emoji import EmojiVariant
@@ -125,3 +126,18 @@ class Message(BaseMessage[MessageSegment]):
             elif seg.type == "markup":
                 elements.append(Markup(**seg.data))
         return ConsoleMessage(elements)
+
+    @classmethod
+    def from_console_message(cls, message: ConsoleMessage) -> "Message":
+        """从 ConsoleMessage 创建 Message"""
+        msg = cls()
+        for elem in message:
+            if isinstance(elem, Text):
+                msg += MessageSegment.text(elem.text)
+            elif isinstance(elem, Emoji):
+                msg += MessageSegment.emoji(elem.name)
+            else:
+                if TYPE_CHECKING:
+                    assert isinstance(elem, (Markdown, Markup))
+                msg += MessageSegment(type=elem.__class__.__name__.lower(), data=asdict(elem))  # noqa
+        return msg

@@ -1,11 +1,12 @@
-from typing import Literal
+from copy import deepcopy
 from datetime import datetime
+from typing import Any, Literal
 from typing_extensions import override
 
-from nonechat.storage import DIRECT
-from nonebot.utils import escape_tag
-from nonechat.model import User, Channel
-from nonebot.compat import model_dump, type_validate_python
+from pydantic import Field
+from nonechat.model import DIRECT, User, Channel
+from nonebot.utils import DataclassEncoder, escape_tag
+from nonebot.compat import PYDANTIC_V2, ConfigDict, model_dump, model_validator, type_validate_python
 
 from nonebot.adapters import Event as BaseEvent
 
@@ -18,6 +19,15 @@ class Event(BaseEvent):
     post_type: str
     user: User
     channel: Channel
+
+    if PYDANTIC_V2:  # pragma: pydantic-v2
+        model_config = ConfigDict(extra="ignore", arbitrary_types_allowed=True)
+    else:  # pragma: pydantic-v1
+
+        class Config(ConfigDict):
+            extra = "ignore"  # type: ignore
+            arbitrary_types_allowed = True  # type: ignore
+            json_encoders = {Message: DataclassEncoder}  # noqa: RUF012
 
     @override
     def get_type(self) -> str:
@@ -56,7 +66,16 @@ class MessageEvent(Event):
     message: Message
     to_me: bool = False
 
-    original_message: Message
+    original_message: Message = Field(init=False, default_factory=Message)
+
+    @model_validator(mode="after")
+    @classmethod
+    def _check_message(cls, data) -> Any:
+        if isinstance(data, dict):
+            data["original_message"] = deepcopy(data["message"])
+        else:
+            data.original_message = deepcopy(data.message)
+        return data
 
     @override
     def get_message(self) -> Message:
@@ -77,12 +96,12 @@ class MessageEvent(Event):
                 msg_string.extend((escape_tag("".join(texts)), f"<le>{escape_tag(str(seg))}</le>"))
                 texts.clear()
         msg_string.append(escape_tag("".join(texts)))
-        if self.channel == DIRECT:
-            return f"Message from {self.user.nickname} {''.join(msg_string)!r}"
-        return f"Message from {self.user.nickname}@{self.channel.name} {''.join(msg_string)!r}"
+        if self.channel.id == DIRECT.id or self.channel.id.startswith("private:"):
+            return f"Message from {self.user.nickname}({self.user.id}): {''.join(msg_string)!r}"
+        return f"Message from {self.user.nickname}({self.user.id}) @ {self.channel.name}: {''.join(msg_string)!r}"
 
     def convert(self):
-        if self.channel == DIRECT:
+        if self.channel.id == DIRECT.id or self.channel.id.startswith("private:"):
             return type_validate_python(PrivateMessageEvent, model_dump(self))
         return type_validate_python(PublicMessageEvent, model_dump(self))
 

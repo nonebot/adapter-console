@@ -3,7 +3,7 @@ from typing_extensions import override
 from typing import TYPE_CHECKING, Any, Union
 
 from nonebot.message import handle_event
-from nonechat.model import DIRECT, User, Robot, Channel
+from nonechat.model import User, Robot, Channel
 
 from nonebot.adapters import Bot as BaseBot
 
@@ -26,14 +26,10 @@ def _check_at_me(bot: "Bot", event: MessageEvent):
     if message[0].type == "text":
         if message[0].data["text"].startswith(f"@{bot.self_id}"):
             event.to_me = True
-            message[0].data["text"] = (
-                message[0].data["text"][len(f"@{bot.self_id}") :].lstrip("\xa0").lstrip()
-            )
+            message[0].data["text"] = message[0].data["text"][len(f"@{bot.self_id}") :].lstrip("\xa0").lstrip()
         elif message[0].data["text"].startswith(f"@{bot.info.nickname}"):
             event.to_me = True
-            message[0].data["text"] = (
-                message[0].data["text"][len(f"@{bot.info.nickname}") :].lstrip("\xa0").lstrip()
-            )
+            message[0].data["text"] = message[0].data["text"][len(f"@{bot.info.nickname}") :].lstrip("\xa0").lstrip()
         if not message[0].data["text"]:
             del message[0]
 
@@ -82,28 +78,28 @@ class Bot(BaseBot):
 
         return await self.call_api(
             "send_msg",
-            message=full_message.to_console_message(),
-            target=event.user if event.channel == DIRECT else event.channel,
+            content=full_message.to_console_message(),
+            channel=event.channel,
         )
 
-    async def send_private_msg(self, user_id: str, message: Union[str, Message, MessageSegment]):
-        user = await self.get_user(user_id)
+    async def send_private_message(self, user_id: str, message: Union[str, Message, MessageSegment]):
+        channel = await self.create_dm(user_id)
         full_message = Message()
         full_message += message
         return await self.call_api(
             "send_msg",
-            message=full_message.to_console_message(),
-            target=user,
+            content=full_message.to_console_message(),
+            channel=channel,
         )
 
-    async def send_group_msg(self, channel_id: str, message: Union[str, Message, MessageSegment]):
+    async def send_group_message(self, channel_id: str, message: Union[str, Message, MessageSegment]):
         channel = await self.get_channel(channel_id)
         full_message = Message()
         full_message += message
         return await self.call_api(
             "send_msg",
-            message=full_message.to_console_message(),
-            target=channel,
+            content=full_message.to_console_message(),
+            channel=channel,
         )
 
     async def get_user(self, user_id: str) -> User:
@@ -114,13 +110,25 @@ class Bot(BaseBot):
         """获取频道信息"""
         return await self.call_api("get_channel", channel_id=channel_id)
 
-    async def get_users(self) -> list[User]:
+    async def list_users(self) -> list[User]:
         """获取所有用户信息"""
-        return await self.call_api("get_users")
+        return await self.call_api("list_users")
 
-    async def get_channels(self) -> list[Channel]:
-        """获取所有频道信息"""
-        return await self.call_api("get_channels")
+    async def list_channels(self, list_users: bool = False) -> list[Channel]:
+        """获取所有频道信息
+
+        Args:
+            list_users (bool): 是否获取私聊用户列表，默认为 False
+        """
+        return await self.call_api("list_channels", list_users=list_users)
+
+    async def create_dm(self, user_id: str) -> Channel:
+        """创建私聊频道
+
+        Args:
+            user_id (str): 用户ID
+        """
+        return await self.call_api("create_dm", user_id=user_id)
 
     async def handle_event(self, event: Event) -> None:
         """处理收到的事件"""

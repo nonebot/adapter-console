@@ -12,6 +12,7 @@ from nonebot import get_plugin_config
 from nonebot.adapters import Adapter as BaseAdapter
 
 from .bot import Bot
+from .utils import log
 from .event import Event
 from .config import Config
 from .exception import ApiNotAvailable
@@ -50,12 +51,11 @@ class Adapter(BaseAdapter):
                 sub_title="welcome to Console",
                 toolbar_exit="❌",
                 icon_color=Color.parse("#EA5252"),
-                bot_name=self.console_config.console_bot_name,
             ),
         )
         self._frontend.backend.set_adapter(self)
-        bot = Bot(self, self._frontend.backend.bot)
-        self.bot_connect(bot)
+        self._frontend.backend.current_bot.id = self.console_config.console_bot_id
+        self._frontend.backend.current_bot.nickname = self.console_config.console_bot_name
         self._task = asyncio.create_task(self._frontend.run_async())
 
     async def _shutdown(self) -> None:
@@ -67,24 +67,27 @@ class Adapter(BaseAdapter):
             self.bot_disconnect(bot)
 
     def post_event(self, event: Event) -> None:
+        if event.self_id not in self.bots:
+            log("WARNING", f"Received event from unknown bot {event.self_id}.")
         bot: Bot = self.bots[event.self_id]  # type: ignore
         asyncio.create_task(bot.handle_event(event))
 
     @override
     async def _call_api(self, bot: Bot, api: str, **data: Any):
         if api == "send_msg":
-            self._frontend.send_message(**data)
+            await self._frontend.send_message(**data, bot=bot.info)
         elif api == "bell":
             await self._frontend.toggle_bell()
         elif api == "get_user":
-            return next(user for user in self._frontend.storage.users if user.id == data["user_id"])
+            return await self._frontend.backend.get_user(data["user_id"])
         elif api == "get_channel":
-            return next(
-                channel for channel in self._frontend.storage.channels if channel.id == data["channel_id"]
-            )
+            return await self._frontend.backend.get_channel(data["channel_id"])
         elif api == "get_users":
-            return self._frontend.storage.users
+            return await self._frontend.backend.list_users()
         elif api == "get_channels":
-            return self._frontend.storage.channels
+            return await self._frontend.backend.list_channels(data.get("list_users", False))
+        elif api == "create_dm":
+            user = await self._frontend.backend.get_user(data["user_id"])
+            return await self._frontend.backend.create_dm(user)
         else:
             raise ApiNotAvailable(f"API {api} is not available in Console adapter")
