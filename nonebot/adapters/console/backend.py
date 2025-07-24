@@ -65,6 +65,7 @@ class AdapterConsoleBackend(Backend):
                     self_id=event.self_id,
                     user=event.user,
                     post_type="message",
+                    message_id=event.message_id,
                     message=Message.from_console_message(event.message),
                     channel=event.channel,
                 ).convert()

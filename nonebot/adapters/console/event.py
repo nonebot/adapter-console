@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Any, Literal
 from typing_extensions import override
 
-from pydantic import Field
+from pydantic import Field, BaseModel
 from nonechat.model import DIRECT, User, Channel
 from nonebot.utils import DataclassEncoder, escape_tag
 from nonebot.compat import PYDANTIC_V2, ConfigDict, model_dump, model_validator, type_validate_python
@@ -11,6 +11,11 @@ from nonebot.compat import PYDANTIC_V2, ConfigDict, model_dump, model_validator,
 from nonebot.adapters import Event as BaseEvent
 
 from .message import Message
+
+
+class MessageResponse(BaseModel):
+    message_id: str
+    channel_id: str
 
 
 class Event(BaseEvent):
@@ -63,6 +68,7 @@ class Event(BaseEvent):
 
 class MessageEvent(Event):
     post_type: Literal["message"] = "message"
+    message_id: str
     message: Message
     to_me: bool = False
 

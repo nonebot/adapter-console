@@ -4,7 +4,7 @@ build-backend = "pdm.backend"
 
 [project]
 name = "nonebot-adapter-console"
-version = "0.8.0"
+version = "0.9.0"
 description = "console adapter for nonebot2"
 authors = [
   { name = "RF-Tar-Railt", email = "rf_tar_railt@qq.com" },
@@ -12,7 +12,7 @@ authors = [
   { name = "yanyongyu", email = "yyy@nonebot.dev" },
 ]
 dependencies = [
-    "nonechat<0.6.0,>=0.5.0",
+    "nonechat<0.7.0,>=0.6.0",
     "nonebot2>=2.4.2",
     "typing-extensions>=4.7.1",
 ]

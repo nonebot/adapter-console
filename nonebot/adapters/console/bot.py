@@ -8,8 +8,8 @@ from nonechat.model import User, Robot, Channel
 from nonebot.adapters import Bot as BaseBot
 
 from .utils import log
-from .event import Event, MessageEvent
 from .message import Message, MessageSegment
+from .event import Event, MessageEvent, MessageResponse
 
 if TYPE_CHECKING:
     from .adapter import Adapter
@@ -76,30 +76,76 @@ class Bot(BaseBot):
         full_message = Message()
         full_message += message
 
-        return await self.call_api(
+        msg_id = await self.call_api(
             "send_msg",
             content=full_message.to_console_message(),
             channel=event.channel,
         )
+        return MessageResponse(message_id=msg_id, channel_id=event.channel.id)
 
     async def send_private_message(self, user_id: str, message: Union[str, Message, MessageSegment]):
         channel = await self.create_dm(user_id)
         full_message = Message()
         full_message += message
-        return await self.call_api(
+        msg_id = await self.call_api(
             "send_msg",
             content=full_message.to_console_message(),
             channel=channel,
         )
+        return MessageResponse(message_id=msg_id, channel_id=channel.id)
 
-    async def send_group_message(self, channel_id: str, message: Union[str, Message, MessageSegment]):
+    async def send_message(self, channel_id: str, message: Union[str, Message, MessageSegment]):
         channel = await self.get_channel(channel_id)
         full_message = Message()
         full_message += message
-        return await self.call_api(
+        msg_id = await self.call_api(
             "send_msg",
             content=full_message.to_console_message(),
             channel=channel,
+        )
+        return MessageResponse(message_id=msg_id, channel_id=channel.id)
+
+    async def get_message(self, message_id: str, channel_id: str) -> MessageEvent:
+        """获取消息内容
+
+        Args:
+            message_id (str): 消息ID
+            channel_id (str): 频道ID
+        """
+        event = await self.call_api("get_msg", message_id=message_id, channel_id=channel_id)
+        return MessageEvent(
+            time=event.time,
+            self_id=event.self_id,
+            user=event.user,
+            post_type="message",
+            message_id=event.message_id,
+            message=Message.from_console_message(event.message),
+            channel=event.channel,
+        ).convert()
+
+    async def recall_message(self, message_id: str, channel_id: str) -> None:
+        """撤回消息
+
+        Args:
+            message_id (str): 消息ID
+            channel_id (str): 频道ID
+        """
+        await self.call_api("recall_msg", message_id=message_id, channel_id=channel_id)
+
+    async def edit_message(
+        self, message_id: str, channel_id: str, content: Union[str, Message, MessageSegment]
+    ) -> None:
+        """编辑消息
+
+        Args:
+            message_id (str): 消息ID
+            channel_id (str): 频道ID
+            content (Union[str, Message, MessageSegment]): 消息内容
+        """
+        full_message = Message()
+        full_message += content
+        await self.call_api(
+            "edit_msg", message_id=message_id, content=full_message.to_console_message(), channel_id=channel_id
         )
 
     async def get_user(self, user_id: str) -> User:

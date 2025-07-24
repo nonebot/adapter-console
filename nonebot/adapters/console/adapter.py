@@ -75,19 +75,27 @@ class Adapter(BaseAdapter):
     @override
     async def _call_api(self, bot: Bot, api: str, **data: Any):
         if api == "send_msg":
-            await self._frontend.send_message(**data, bot=bot.info)
-        elif api == "bell":
-            await self._frontend.toggle_bell()
-        elif api == "get_user":
+            return await self._frontend.send_message(**data, bot=bot.info)
+        if api == "bell":
+            return await self._frontend.toggle_bell()
+        if api == "get_user":
             return await self._frontend.backend.get_user(data["user_id"])
-        elif api == "get_channel":
+        if api == "get_channel":
             return await self._frontend.backend.get_channel(data["channel_id"])
-        elif api == "get_users":
+        if api == "get_users":
             return await self._frontend.backend.list_users()
-        elif api == "get_channels":
+        if api == "get_channels":
             return await self._frontend.backend.list_channels(data.get("list_users", False))
-        elif api == "create_dm":
+        if api == "create_dm":
             user = await self._frontend.backend.get_user(data["user_id"])
             return await self._frontend.backend.create_dm(user)
-        else:
-            raise ApiNotAvailable(f"API {api} is not available in Console adapter")
+        if api == "get_msg":
+            channel = await self._frontend.backend.get_channel(data["channel_id"])
+            return await self._frontend.backend.get_chat(data["message_id"], channel)
+        if api == "recall_msg":
+            channel = await self._frontend.backend.get_channel(data["channel_id"])
+            return await self._frontend.recall_message(data["message_id"], channel)
+        if api == "edit_msg":
+            channel = await self._frontend.backend.get_channel(data["channel_id"])
+            return await self._frontend.edit_message(data["message_id"], data["content"], channel)
+        raise ApiNotAvailable(f"API {api} is not available in Console adapter")
