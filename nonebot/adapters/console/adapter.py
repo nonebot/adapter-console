@@ -84,7 +84,7 @@ class Adapter(BaseAdapter):
             return await self._frontend.backend.get_channel(data["channel_id"])
         if api == "get_users":
             return await self._frontend.backend.list_users()
-        if api == "get_channels":
+        if api == "list_channels":
             return await self._frontend.backend.list_channels(data.get("list_users", False))
         if api == "create_dm":
             user = await self._frontend.backend.get_user(data["user_id"])
