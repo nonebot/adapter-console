@@ -1,5 +1,3 @@
-from typing import Optional
-
 from nonebot.exception import AdapterException
 from nonebot.exception import ApiNotAvailable as BaseApiNotAvailable
 
@@ -10,7 +8,7 @@ class ConsoleAdapterException(AdapterException):
 
 
 class ApiNotAvailable(BaseApiNotAvailable, ConsoleAdapterException):
-    def __init__(self, msg: Optional[str] = None):
+    def __init__(self, msg: str | None = None):
         super().__init__()
-        self.msg: Optional[str] = msg
+        self.msg: str | None = msg
         """错误原因"""

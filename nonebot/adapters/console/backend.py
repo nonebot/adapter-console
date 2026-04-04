@@ -1,20 +1,20 @@
-from typing import TYPE_CHECKING, Optional, cast
+from typing import TYPE_CHECKING, cast
 
 from loguru import _colorama
-from nonechat import Backend
-from nonechat.model import Robot
-from loguru._logger import Logger
-from nonechat.app import Frontend
 from loguru._handler import Handler
-from nonechat.backend import BotAdd
-from nonebot.log import logger, logger_id
+from loguru._logger import Logger
 from loguru._simple_sinks import StreamSink
+from nonebot.log import logger, logger_id
+from nonechat import Backend
+from nonechat.app import Frontend
+from nonechat.backend import BotAdd
 from nonechat.model import Event as ConsoleEvent
 from nonechat.model import MessageEvent as ConsoleMessageEvent
+from nonechat.model import Robot
 
 from .bot import Bot
-from .message import Message
 from .event import Event, MessageEvent
+from .message import Message
 
 if TYPE_CHECKING:
     from .adapter import Adapter
@@ -26,7 +26,7 @@ class AdapterConsoleBackend(Backend):
     def __init__(self, frontend: "Frontend"):
         super().__init__(frontend)
         self.current_user.id = "user"
-        self._origin_sink: Optional[StreamSink] = None
+        self._origin_sink: StreamSink | None = None
 
     def set_adapter(self, adapter: "Adapter"):
         self._adapter = adapter

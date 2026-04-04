@@ -3,10 +3,10 @@ from datetime import datetime
 from typing import Any, Literal
 from typing_extensions import override
 
-from pydantic import Field, BaseModel
-from nonechat.model import DIRECT, User, Channel
-from nonebot.utils import DataclassEncoder, escape_tag
 from nonebot.compat import PYDANTIC_V2, ConfigDict, model_dump, model_validator, type_validate_python
+from nonebot.utils import DataclassEncoder, escape_tag
+from nonechat.model import DIRECT, Channel, User
+from pydantic import BaseModel, Field
 
 from nonebot.adapters import Event as BaseEvent
 

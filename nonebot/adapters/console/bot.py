@@ -1,15 +1,15 @@
 import re
+from typing import TYPE_CHECKING, Any
 from typing_extensions import override
-from typing import TYPE_CHECKING, Any, Union
 
 from nonebot.message import handle_event
-from nonechat.model import User, Robot, Channel
+from nonechat.model import Channel, Robot, User
 
 from nonebot.adapters import Bot as BaseBot
 
-from .utils import log
-from .message import Message, MessageSegment
 from .event import Event, MessageEvent, MessageResponse
+from .message import Message, MessageSegment
+from .utils import log
 
 if TYPE_CHECKING:
     from .adapter import Adapter
@@ -70,7 +70,7 @@ class Bot(BaseBot):
     async def send(
         self,
         event: Event,
-        message: Union[str, Message, MessageSegment],
+        message: str | Message | MessageSegment,
         **kwargs: Any,
     ) -> Any:
         full_message = Message()
@@ -83,7 +83,7 @@ class Bot(BaseBot):
         )
         return MessageResponse(message_id=msg_id, channel_id=event.channel.id)
 
-    async def send_private_message(self, user_id: str, message: Union[str, Message, MessageSegment]):
+    async def send_private_message(self, user_id: str, message: str | Message | MessageSegment):
         channel = await self.create_dm(user_id)
         full_message = Message()
         full_message += message
@@ -94,7 +94,7 @@ class Bot(BaseBot):
         )
         return MessageResponse(message_id=msg_id, channel_id=channel.id)
 
-    async def send_message(self, channel_id: str, message: Union[str, Message, MessageSegment]):
+    async def send_message(self, channel_id: str, message: str | Message | MessageSegment):
         channel = await self.get_channel(channel_id)
         full_message = Message()
         full_message += message
@@ -132,9 +132,7 @@ class Bot(BaseBot):
         """
         await self.call_api("recall_msg", message_id=message_id, channel_id=channel_id)
 
-    async def edit_message(
-        self, message_id: str, channel_id: str, content: Union[str, Message, MessageSegment]
-    ) -> None:
+    async def edit_message(self, message_id: str, channel_id: str, content: str | Message | MessageSegment) -> None:
         """编辑消息
 
         Args:
@@ -147,6 +145,14 @@ class Bot(BaseBot):
         await self.call_api(
             "edit_msg", message_id=message_id, content=full_message.to_console_message(), channel_id=channel_id
         )
+
+    async def get_current_user(self) -> User:
+        """获取当前用户信息"""
+        return await self.call_api("current_user")
+
+    async def get_current_channel(self) -> Channel:
+        """获取当前频道信息"""
+        return await self.call_api("current_channel")
 
     async def get_user(self, user_id: str) -> User:
         """获取用户信息"""
